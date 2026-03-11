@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function HeroMission() {
   return (
@@ -19,16 +20,18 @@ export default function HeroMission() {
           Networking the world with Godly laughter through Prophet Uebert Angel ❤️🌍
         </p>
 
-        {/* Call to Action - Overriding variant to create high contrast on the yellow background */}
+        {/* Call to Action */}
         <div className="pt-8">
-          <Button 
+          <Button
+            asChild 
             size="lg" 
-            className="bg-black text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80 font-bold text-lg px-8 py-6 rounded-none border-2 border-transparent transition-all hover:scale-105"
-          >
-            Explore Latest Laughs
+            className="bg-brand-blue text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80 font-bold text-lg px-8 py-6 rounded-none border-2 border-transparent transition-all hover:scale-105"
+          > 
+            <Link href="/about">
+               The LNW Story
+            </Link>
           </Button>
         </div>
-
       </div>
     </section>
   );

@@ -6,16 +6,16 @@ import {
   SheetContent,
   SheetTrigger,
   SheetTitle,
+  SheetClose, // <--- Add this right here!
 } from "@/components/ui/sheet";
 
 export default function Navbar() {
-  // Centralized routing configuration. 
-  // If we ever need to change a route, we only change it here.
   const routes = [
-    { name: "Latest Laughs", href: "/blog" },
-    { name: "Meme Gallery", href: "/memes" },
-    { name: "Submit a Meme", href: "/submit" },
     { name: "About", href: "/about" },
+    { name: "Latest Laughs", href: "/blog" },
+    { name: "Watch LNW", href: "/watch" },
+    { name: "Submit a Meme", href: "/submit" },
+    
   ];
 
   return (
@@ -58,17 +58,20 @@ export default function Navbar() {
               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
               <nav className="flex flex-col space-y-8 mt-12">
                 {routes.map((route) => (
-                  <Link
-                    key={route.href}
-                    href={route.href}
-                    className="text-2xl font-black uppercase tracking-tighter text-foreground hover:text-primary transition-colors"
-                  >
-                    {route.name}
-                  </Link>
+                  <SheetClose asChild key={route.href}>
+                    <Link
+                      href={route.href}
+                      className="text-2xl font-black uppercase tracking-tighter text-foreground hover:text-primary transition-colors"
+                    >
+                      {route.name}
+                    </Link>
+                  </SheetClose>
                 ))}
-                <Button className="bg-brand-blue text-white hover:bg-brand-blue/90 font-bold text-lg py-6 rounded-none mt-4">
-                  Subscribe
-                </Button>
+                <SheetClose asChild>
+                  <Button className="bg-brand-blue text-white hover:bg-brand-blue/90 font-bold text-lg py-6 rounded-none mt-4">
+                    Subscribe
+                  </Button>
+                </SheetClose>
               </nav>
             </SheetContent>
           </Sheet>

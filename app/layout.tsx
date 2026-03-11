@@ -1,4 +1,3 @@
-// Make sure to import the Navbar at the top of layout.tsx
 import Navbar from "@/components/Navbar";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -9,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "LaughNewsWorld",
-  description: "Global Unity Through Humour",
+  description: "Networking the world with Godly laughter through Prophet Uebert Angel",
 };
 
 export default function RootLayout({
