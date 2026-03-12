@@ -6,7 +6,7 @@ export default function Footer() {
 
   // Centralized routing matching the Navbar
   const routes = [
-    { name: "Latest Laughs", href: "/blog" },
+    { name: "The LNW Chronicle", href: "/blog" },
     { name: "Meme Gallery", href: "/memes" },
     { name: "Submit a Meme", href: "/submit" },
     { name: "About", href: "/about" },

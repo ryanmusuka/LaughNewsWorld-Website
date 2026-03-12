@@ -12,7 +12,7 @@ import {
 export default function Navbar() {
   const routes = [
     { name: "About", href: "/about" },
-    { name: "Latest Laughs", href: "/blog" },
+    { name: "The LNW Chronicle", href: "/blog" },
     { name: "Watch LNW", href: "/watch" },
     { name: "Submit a Meme", href: "/submit" },
     

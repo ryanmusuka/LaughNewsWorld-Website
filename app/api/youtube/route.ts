@@ -18,7 +18,6 @@ export async function GET() {
     const longData = await longRes.json();
     const shortsData = await shortsRes.json();
 
-    // 🚨 THE TRIPWIRE: Print exact error to terminal if YouTube rejects us
     if (!longData.items) {
       console.error("🚨 YOUTUBE API ERROR (LONG VIDEOS):", JSON.stringify(longData, null, 2));
     }
