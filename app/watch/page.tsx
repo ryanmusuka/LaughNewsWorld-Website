@@ -1,8 +1,9 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
-import { Play, Youtube } from "lucide-react";
+import { Play, Youtube, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 
 // Reusable animation variants
 const fadeUp: Variants = {
@@ -12,7 +13,7 @@ const fadeUp: Variants = {
     y: 0, 
     transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const } 
   }
-};
+}; 
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -22,21 +23,28 @@ const staggerContainer = {
   }
 };
 
-// --- MOCK DATA (We will replace this with the YouTube API later) ---
-const mockLongVideos = Array.from({ length: 9 }).map((_, i) => ({
-  id: `long-${i}`,
-  title: "The Deep Revelation Behind The Laughter",
-  thumbnail: `https://picsum.photos/seed/long${i}/1280/720`,
-}));
-
-const mockShorts = Array.from({ length: 9 }).map((_, i) => ({
-  id: `short-${i}`,
-  title: "Hilarious Church Moments 😂",
-  thumbnail: `https://picsum.photos/seed/short${i}/720/1280`,
-}));
-// -----------------------------------------------------------------
-
 export default function WatchPage() {
+  const [longVideos, setLongVideos] = useState<any[]>([]);
+  const [shorts, setShorts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch from our new Next.js API route on load
+  useEffect(() => {
+    async function fetchVideos() {
+      try {
+        const res = await fetch('/api/youtube');
+        const data = await res.json();
+        setLongVideos(data.longVideos || []);
+        setShorts(data.shorts || []);
+      } catch (error) {
+        console.error("Failed to fetch YouTube videos:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchVideos();
+  }, []);
+
   return (
     <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 text-black dark:text-white pt-28 pb-16 px-6 flex flex-col items-center">
       
@@ -59,71 +67,85 @@ export default function WatchPage() {
           </motion.p>
         </motion.section>
 
-       {/* 2. THE MAIN STAGE (16:9 Long Form) */}
-        <section className="space-y-12">
-          
-          <motion.div 
-            initial="hidden" animate="visible" variants={fadeUp} 
-            className="text-center md:text-left border-b-[4px] border-black dark:border-white pb-4"
-          >
-            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter">Latest Laughs & Revelation</h2>
-            <p className="text-zinc-500 mt-2 font-medium">Deep dives, full teachings, and unforgettable moments.</p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {mockLongVideos.map((video) => (
-              <motion.a 
-                key={video.id}
-                initial="hidden" 
-                whileInView="visible" 
-                viewport={{ once: true, margin: "50px" }} // Triggers individually as they scroll up!
-                variants={fadeUp}
-                href="#"
-                className="group relative block overflow-hidden bg-zinc-200 dark:bg-zinc-900 aspect-video rounded-xl border-4 border-transparent hover:border-brand-blue transition-all"
-              >
-                <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="bg-brand-yellow text-black p-4 rounded-full transform scale-75 group-hover:scale-100 transition-transform duration-300">
-                    <Play className="w-8 h-8 fill-black ml-1" />
-                  </div>
-                </div>
-              </motion.a>
-            ))}
+        {/* LOADING STATE - Shows while the API fetches */}
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 space-y-4">
+            <Loader2 className="w-12 h-12 animate-spin text-brand-blue" />
+            <p className="text-xl font-bold uppercase tracking-widest text-zinc-500">Loading the Vault...</p>
           </div>
-        </section>
-
-        {/* 3. THE VERTICAL VAULT (9:16 Shorts) */}
-        <section className="space-y-12 pb-24">
-          
-          <motion.div 
-            initial="hidden" animate="visible" variants={fadeUp} 
-            className="text-center md:text-left border-b-[4px] border-black dark:border-white pb-4"
-          >
-            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter">The Vertical Vault</h2>
-            <p className="text-zinc-500 mt-2 font-medium">Quick hits, viral reels, and rapid-fire joy.</p>
-          </motion.div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {mockShorts.map((video) => (
-              <motion.a 
-                key={video.id}
-                initial="hidden" 
-                whileInView="visible" 
-                viewport={{ once: true, margin: "50px" }} // Triggers individually
-                variants={fadeUp}
-                href="#"
-                className="group relative block overflow-hidden bg-zinc-200 dark:bg-zinc-900 aspect-[9/16] rounded-xl border-4 border-transparent hover:border-brand-yellow transition-all"
+        ) : (
+          <>
+            {/* 2. THE MAIN STAGE (16:9 Long Form) */}
+            <section className="space-y-12">
+              
+              <motion.div 
+                initial="hidden" animate="visible" variants={fadeUp} 
+                className="text-center md:text-left border-b-[4px] border-black dark:border-white pb-4"
               >
-                <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="bg-brand-blue text-white p-3 rounded-full transform scale-75 group-hover:scale-100 transition-transform duration-300">
-                    <Play className="w-6 h-6 fill-white ml-1" />
-                  </div>
-                </div>
-              </motion.a>
-            ))}
-          </div>
-        </section>
+                <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter">Latest Laughs & Revelation</h2>
+                <p className="text-zinc-500 mt-2 font-medium">Deep dives, full teachings, and unforgettable moments.</p>
+              </motion.div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                {longVideos.map((video) => (
+                  <motion.a 
+                    key={video.id}
+                    initial="hidden" 
+                    whileInView="visible" 
+                    viewport={{ once: true, margin: "50px" }} // Triggers individually as they scroll up!
+                    variants={fadeUp}
+                    href={video.link} // Now using the real YouTube link
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative block overflow-hidden bg-zinc-200 dark:bg-zinc-900 aspect-video rounded-xl border-4 border-transparent hover:border-brand-blue transition-all"
+                  >
+                    <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="bg-brand-yellow text-black p-4 rounded-full transform scale-75 group-hover:scale-100 transition-transform duration-300">
+                        <Play className="w-8 h-8 fill-black ml-1" />
+                      </div>
+                    </div>
+                  </motion.a>
+                ))}
+              </div>
+            </section>
+
+            {/* 3. THE VERTICAL VAULT (9:16 Shorts) */}
+            <section className="space-y-12 pb-24">
+              
+              <motion.div 
+                initial="hidden" animate="visible" variants={fadeUp} 
+                className="text-center md:text-left border-b-[4px] border-black dark:border-white pb-4"
+              >
+                <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter">The Vertical Vault</h2>
+                <p className="text-zinc-500 mt-2 font-medium">Quick hits, viral reels, and rapid-fire joy.</p>
+              </motion.div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                {shorts.map((video) => (
+                  <motion.a 
+                    key={video.id}
+                    initial="hidden" 
+                    whileInView="visible" 
+                    viewport={{ once: true, margin: "50px" }} // Triggers individually
+                    variants={fadeUp}
+                    href={video.link} // Now using the real YouTube link
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative block overflow-hidden bg-zinc-200 dark:bg-zinc-900 aspect-[9/16] rounded-xl border-4 border-transparent hover:border-brand-yellow transition-all"
+                  >
+                    <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="bg-brand-blue text-white p-3 rounded-full transform scale-75 group-hover:scale-100 transition-transform duration-300">
+                        <Play className="w-6 h-6 fill-white ml-1" />
+                      </div>
+                    </div>
+                  </motion.a>
+                ))}
+              </div>
+            </section>
+          </>
+        )}
 
         {/* 4. THE CALL TO ACTION */}
         <motion.section 
