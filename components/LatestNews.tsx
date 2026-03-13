@@ -39,21 +39,21 @@ export default function LatestNews() {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between border-b-4 border-black dark:border-white pb-4">
           <div>
-            <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter">Latest Laughs</h2>
-            <p className="text-muted-foreground font-medium mt-2">The news you actually want to read.</p>
+            <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter"><span className="text-brand-blue">Recent</span> Articles</h2>
+            <p className="text-muted-foreground font-medium mt-2">Literary pieces from the LNW Team.</p>
           </div>
-          <Link href="/blog" className="hidden md:block text-brand-blue font-bold hover:underline">
-            View All Articles &rarr;
-          </Link>
+          <Button className="hidden md:flex mt-4 md:mt-0 bg-brand-yellow text-white hover:bg-black/80 dark:text-black dark:hover:bg-white/80 font-bold text-lg px-8 py-6 rounded-none border-2 border-transparent transition-all hover:scale-105">
+            <Link href="/watch">
+               View All Articles
+            </Link>
+          </Button>
         </div>
 
         {/* The CSS Grid - Mobile First Architecture */}
-        {/* 1 column on mobile, 2 on tablets, 3 on large screens */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {MOCK_NEWS.map((article) => (
             <Card key={article.id} className="rounded-none border-2 border-border overflow-hidden group hover:border-primary transition-colors">
               <div className="relative h-60 w-full overflow-hidden bg-muted">
-                {/* Security Note: Next.js Image component automatically prevents hotlinking attacks and optimizes payloads */}
                 <Image 
                   src={article.imageUrl} 
                   alt={article.title}
@@ -85,9 +85,9 @@ export default function LatestNews() {
         </div>
         
         {/* Mobile-only "View All" Button */}
-        <div className="md:hidden mt-8">
-          <Button className="w-full rounded-none font-bold bg-brand-blue text-white" size="lg">
-            View All Articles
+        <div className="px-6 md:hidden">
+          <Button className="w-full bg-brand-blue text-white hover:bg-black/80 dark:text-black dark:hover:bg-white/80 font-bold text-lg px-8 py-6 rounded-none border-2 border-transparent transition-all hover:scale-105">
+            View More Articles
           </Button>
         </div>
 

@@ -6,14 +6,14 @@ export default function Footer() {
 
   // Centralized routing matching the Navbar
   const routes = [
-    { name: "The LNW Chronicle", href: "/blog" },
-    { name: "Meme Gallery", href: "/memes" },
-    { name: "Submit a Meme", href: "/submit" },
     { name: "About", href: "/about" },
+    { name: "The LNW Chronicle", href: "/blog" },
+    { name: "Watch LNW", href: "/watch" },
+    { name: "Submit a Meme", href: "/submit" },
+    { name: "Donate", href: "/donate" },
   ];
 
   return (
-    // Stark black background with a thick LNW Yellow top border to anchor the page
     <footer className="w-full bg-black text-white py-12 px-6 border-t-[8px] border-brand-yellow">
       <div className="container mx-auto max-w-7xl flex flex-col md:flex-row justify-between items-start gap-10">
         

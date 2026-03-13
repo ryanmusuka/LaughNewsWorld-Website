@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { motion, Variants } from "framer-motion";
@@ -13,7 +14,7 @@ const fadeUp: Variants = {
     y: 0, 
     transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const } 
   }
-}; 
+};
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -46,10 +47,9 @@ export default function WatchPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 text-black dark:text-white pt-28 pb-16 px-6 flex flex-col items-center">
+    <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 text-black dark:text-white pt-12 pb-20 px-6 flex flex-col items-center">
       
-      {/* 2. Reduced space-y-32 to space-y-16 to bring sections closer together */}
-      <div className="max-w-7xl w-full mx-auto space-y-16 md:space-y-20">
+      <div className="max-w-7xl w-full mx-auto space-y-20 md:space-y-20">
         
         {/* 1. THE HEADER */}
         <motion.section 

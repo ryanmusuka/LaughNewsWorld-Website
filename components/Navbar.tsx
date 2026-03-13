@@ -69,7 +69,7 @@ export default function Navbar() {
                 ))}
                 <SheetClose asChild>
                   <Button className="bg-brand-blue text-white hover:bg-brand-blue/90 font-bold text-lg py-6 rounded-none mt-4">
-                    Subscribe
+                    Donate
                   </Button>
                 </SheetClose>
               </nav>

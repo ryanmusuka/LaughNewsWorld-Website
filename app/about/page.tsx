@@ -15,7 +15,7 @@ const fadeUp: Variants = {
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 text-black dark:text-white pt-28 pb-16 px-6 flex flex-col items-center">
+    <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 text-black dark:text-white pt-12 pb-20 px-6 flex flex-col items-center">
       
       <article className="max-w-2xl w-full mx-auto space-y-16 md:space-y-20">
         

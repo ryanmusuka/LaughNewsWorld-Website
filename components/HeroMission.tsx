@@ -3,7 +3,6 @@ import Link from "next/link";
 
 export default function HeroMission() {
   return (
-    // Mobile-First CSS: Default padding is py-16, expanding to py-32 on large screens
     <section className="w-full bg-primary py-16 px-6 md:py-24 lg:py-32 flex flex-col items-center justify-center text-center border-b-[8px] border-black dark:border-white">
       <div className="max-w-4xl space-y-6">
         
@@ -25,7 +24,7 @@ export default function HeroMission() {
           <Button
             asChild 
             size="lg" 
-            className="bg-brand-blue text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80 font-bold text-lg px-8 py-6 rounded-none border-2 border-transparent transition-all hover:scale-105"
+            className="bg-brand-blue text-white hover:bg-black/80 dark:text-black dark:hover:bg-white/80 font-bold text-lg px-8 py-6 rounded-none border-2 border-transparent transition-all hover:scale-105"
           > 
             <Link href="/about">
                The LNW Story

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import { useState } from "react";
@@ -6,7 +7,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Search } from "lucide-react";
 
-// Mock Data - We will move this to a database/CMS later!
 const blogPosts = [
   {
     id: "1",
@@ -84,11 +84,11 @@ export default function NewsPage() {
   );
 
   return (
-    <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 pt-28 pb-20 px-6 font-sans">
+    <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 pt-12 pb-12 px-6 font-sans">
       <div className="max-w-7xl mx-auto">
         
         {/* HEADER & SEARCH ROW */}
-        <header className="flex flex-col md:flex-row md:items-end justify-between border-b-4 border-black dark:border-white pb-6 mb-10 gap-6">
+        <header className="flex flex-col md:flex-row md:items-end justify-between border-b-4 border-black dark:border-white pb-6 mb-10 gap-1">
           <div>
             <motion.h1 
               initial={{ opacity: 0, x: -20 }}
@@ -98,7 +98,7 @@ export default function NewsPage() {
               The <span className="text-brand-blue">Front</span> Page
             </motion.h1>
             <p className="text-zinc-500 font-bold mt-2 uppercase tracking-widest text-sm">
-              Global Edition • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+              The Latest Articles from The LNW Team • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
             </p>
           </div>
 

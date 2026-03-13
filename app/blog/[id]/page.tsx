@@ -144,7 +144,7 @@ export default function ArticlePage() {
   const post = mockDatabase.find(p => p.id === params.id) || mockDatabase[0];
 
   return (
-    <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 text-black dark:text-white pt-28 pb-20 px-6">
+    <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 text-black dark:text-white pt-28 pb-16 px-6">
       
       {/* TOP NAVIGATION */}
       <div className="max-w-4xl mx-auto mb-10">
