@@ -9,7 +9,7 @@ export default function Footer() {
     { name: "About", href: "/about" },
     { name: "The LNW Chronicle", href: "/blog" },
     { name: "Watch LNW", href: "/watch" },
-    { name: "Submit a Meme", href: "/submit" },
+    { name: "Advertise Your Business", href: "/advertise" },
     { name: "Donate", href: "/donate" },
   ];
 
