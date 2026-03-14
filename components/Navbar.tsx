@@ -40,7 +40,9 @@ export default function Navbar() {
             </Link>
           ))}
           <Button className="bg-brand-blue text-white hover:bg-brand-blue/90 font-bold rounded-none border-2 border-transparent transition-all">
-            Subscribe
+            <Link href = "/donate">
+                Donate
+            </Link>
           </Button>
         </nav>
 
@@ -68,7 +70,9 @@ export default function Navbar() {
                 ))}
                 <SheetClose asChild>
                   <Button className="bg-brand-blue text-white hover:bg-brand-blue/90 font-bold text-lg py-6 rounded-none mt-4">
-                    Donate
+                    <Link href = "/donate">
+                        Donate
+                    </Link>
                   </Button>
                 </SheetClose>
               </nav>

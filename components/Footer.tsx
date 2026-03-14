@@ -47,10 +47,10 @@ export default function Footer() {
         <div className="flex flex-col space-y-4">
           <h4 className="font-bold text-lg uppercase tracking-widest text-zinc-500 mb-2">Connect</h4>
           <Link href="#" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">YouTube</Link>
-          <Link href="#" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">Whatsapp Social Group</Link>
           <Link href="#" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">Instagram</Link>
           <Link href="#" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">TikTok</Link>
           <Link href="#" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">Facebook</Link>
+          <Link href="#" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">Whatsapp Social Group</Link>
           <Link href="#" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">Whatsapp Channel</Link>
         </div>
       </div>
