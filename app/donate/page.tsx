@@ -15,7 +15,7 @@ const staggerContainer = {
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] } },
 };
 
 export default function DonatePage() {
@@ -91,7 +91,7 @@ export default function DonatePage() {
           <div className="pt-6">
             <div className="flex items-center justify-center gap-2 text-zinc-600 dark:text-zinc-400 font-medium">
               <Share2 className="w-5 h-5" />
-              <p>Can't donate right now? No problem at all!</p>
+              <p>Can&apos;t donate right now? No problem at all!</p>
             </div>
             <p className="text-sm text-zinc-500 mt-2 max-w-md mx-auto">
               Liking, sharing our posts, telling a friend, and keeping us in your prayers is just as valuable to us. Thank you for being part of the family.

@@ -80,9 +80,9 @@ export default function AdvertisePage() {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
         >
           {[
-            { icon: TrendingUp, title: "Total Monthly Reach", stat: "5M+", desc: "Across all platforms" },
-            { icon: PlayCircle, title: "YouTube Views", stat: "2M+", desc: "Highly engaged viewers" },
-            { icon: Users, title: "Social Following", stat: "150K+", desc: "Combined active followers" },
+            { icon: TrendingUp, title: "Total Monthly Reach", stat: "700K+", desc: "Across all platforms" },
+            { icon: PlayCircle, title: "YouTube Views", stat: "5.3M+", desc: "Highly engaged viewers (in 1 year so far!)" },
+            { icon: Users, title: "Social Following", stat: "90K+", desc: "Combined active followers" },
             { icon: ShieldCheck, title: "Audience Trust", stat: "High", desc: "Niche GNW demographic" },
           ].map((item, i) => (
             <motion.div key={i} variants={fadeUp} className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 p-8 rounded-2xl text-center hover:border-brand-yellow transition-colors">
@@ -97,15 +97,15 @@ export default function AdvertisePage() {
         {/* 3. AD PACKAGES */}
         <motion.section initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="space-y-12">
           <motion.div variants={fadeUp} className="text-center max-w-2xl mx-auto">
-            <h2 className="text-4xl font-black uppercase tracking-tighter mb-4">Introductory Pricing</h2>
-            <p className="text-zinc-500 font-medium">Select a tier that fits your marketing goals. Lock in these introductory rates before they scale.</p>
+            <h2 className="text-4xl font-black uppercase tracking-tighter mb-4">Your Investment</h2>
+            <p className="text-zinc-500 font-medium">Select a tier that fits your marketing goals.</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Category 1 */}
             <motion.div variants={fadeUp} className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-3xl p-8 flex flex-col">
               <h3 className="text-2xl font-black uppercase text-brand-blue mb-2">The Social Feed</h3>
-              <p className="text-zinc-500 text-sm mb-6 pb-6 border-b border-zinc-200 dark:border-zinc-800">Standard reach across our main Instagram & Facebook timelines.</p>
+              <p className="text-zinc-500 text-sm mb-6 pb-6 border-b border-brand-blue dark:border-brand-blue">Standard reach across our main Instagram & Facebook timelines.</p>
               <ul className="space-y-6 mb-8 flex-grow font-medium">
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-brand-yellow shrink-0 mt-0.5"/> 
@@ -137,7 +137,7 @@ export default function AdvertisePage() {
                 Highest Engagement
               </div>
               <h3 className="text-2xl font-black uppercase text-white mb-2">Reels Integration</h3>
-              <p className="text-zinc-400 text-sm mb-6 pb-6 border-b border-zinc-800">Viral potential integrated into our IG, TikTok & YT Shorts.</p>
+              <p className="text-zinc-400 text-sm mb-6 pb-6 border-b border-brand-yellow">Viral potential integrated into our IG, TikTok & YT Shorts.</p>
               <ul className="space-y-6 mb-8 flex-grow font-medium text-zinc-200">
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-brand-yellow shrink-0 mt-0.5"/> 
@@ -164,9 +164,9 @@ export default function AdvertisePage() {
             </motion.div>
 
             {/* Category 3 */}
-            <motion.div variants={fadeUp} className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-3xl p-8 flex flex-col">
+            <motion.div variants={fadeUp} className="bg-white dark:bg-zinc-900 border-2 border-red-200 dark:border-red-800 rounded-3xl p-8 flex flex-col">
               <h3 className="text-2xl font-black uppercase text-[#FF0000] mb-2">YouTube Powerhouse</h3>
-              <p className="text-zinc-500 text-sm mb-6 pb-6 border-b border-zinc-200 dark:border-zinc-800">Deep, focused impact within our long-form content.</p>
+              <p className="text-zinc-500 text-sm mb-6 pb-6 border-b border-red-200 dark:border-red-800">Deep, focused impact within our long-form content.</p>
               <ul className="space-y-6 mb-8 flex-grow font-medium">
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-[#FF0000] shrink-0 mt-0.5"/> 
@@ -181,19 +181,20 @@ export default function AdvertisePage() {
         </motion.section>
 
         {/* 4. HOW IT WORKS */}
-        <motion.section initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="bg-zinc-200 dark:bg-zinc-900 rounded-3xl p-8 md:p-12">
+        <motion.section initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="bg-zinc-200 dark:bg-zinc-900 rounded-3xl p-4 md:p-4">
           <motion.h2 variants={fadeUp} className="text-3xl font-black uppercase tracking-tighter text-center mb-12">How It Works</motion.h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               { step: "01", title: "Choose Your Package", desc: "Select the ad type and platform that best fits your marketing goals." },
               { step: "02", title: "Submit Your Creative", desc: "Send us your video, logo, or image along with your desired caption for review." },
               { step: "03", title: "Publish & Promote", desc: "Upon approval and payment, our team seamlessly integrates and pushes your ad to the timeline." }
             ].map((item, i) => (
               <motion.div key={i} variants={fadeUp} className="relative">
-                <div className="text-6xl font-black text-black/5 dark:text-white/5 absolute -top-6 -left-4 z-0">{item.step}</div>
+                <div className="text-6xl font-black text-black/5 dark:text-white/10 absolute -top-6 -left-4 z-0">{item.step}</div>
                 <div className="relative z-10">
                   <h4 className="text-xl font-bold mb-2">{item.title}</h4>
                   <p className="text-zinc-600 dark:text-zinc-400 font-medium">{item.desc}</p>
+                  <br /><br />
                 </div>
               </motion.div>
             ))}

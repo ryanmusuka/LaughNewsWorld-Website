@@ -52,11 +52,11 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Our Custom LNW Brand Colors
+        
         brand: {
-          yellow: "#ffad00",
-          blue: "#0093c9",
-          black: "#000000",
+          yellow: "rgb(255 173 0 / <alpha-value>)", // #ffad00
+          blue: "rgb(0 147 201 / <alpha-value>)",   // #0093c9
+          black: "rgb(0 0 0 / <alpha-value>)",      // #000000
         }
       },
       borderRadius: {

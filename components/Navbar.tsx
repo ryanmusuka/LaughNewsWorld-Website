@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Menu } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
   SheetTitle,
-  SheetClose, // <--- Add this right here!
+  SheetClose, 
 } from "@/components/ui/sheet";
 
 export default function Navbar() {
@@ -15,6 +16,7 @@ export default function Navbar() {
     { name: "The LNW Chronicle", href: "/blog" },
     { name: "Watch LNW", href: "/watch" },
     { name: "Advertise", href: "/advertise" },
+    { name: "Shop", href: "/shop" },
   ];
 
   return (
@@ -50,31 +52,50 @@ export default function Navbar() {
         <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="hover:bg-transparent">
-                <Menu className="h-8 w-8 text-foreground" />
+              <Button variant="ghost" size="icon" className="hover:bg-transparent group">
+                <Menu className="h-8 w-8 text-foreground transition-transform group-hover:scale-110 group-active:scale-95" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px] border-l-[4px] border-black dark:border-white bg-background">
+            
+            <SheetContent side="right" className="w-[85vw] sm:w-[400px] border-l-4 border-brand-yellow dark:border-brand-blue bg-zinc-50 dark:bg-zinc-950 overflow-hidden">
               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-              <nav className="flex flex-col space-y-8 mt-12">
+              
+              {/* Spinning Background Gimmick */}
+              <div className="absolute -bottom-16 -right-16 text-brand-yellow/10 dark:text-brand-blue/10 pointer-events-none">
+                <Sparkles className="w-80 h-80 animate-[spin_12s_linear_infinite]" />
+              </div>
+
+              {/* Added pl-8 to push everything away from the left border, halved spacing to space-y-4 */}
+              <nav className="flex flex-col space-y-4 mt-20 relative z-10 pl-8">
                 {routes.map((route) => (
                   <SheetClose asChild key={route.href}>
+                    {/* Halved font size to text-2xl */}
                     <Link
                       href={route.href}
-                      className="text-2xl font-black uppercase tracking-tighter text-foreground hover:text-primary transition-colors"
+                      className="group relative flex items-center w-full text-2xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white transition-all"
                     >
-                      {route.name}
+                      {/* Scaled down the hover line and slide distance to match the smaller text */}
+                      <span className="absolute -left-4 w-0 h-1.5 bg-brand-yellow dark:bg-brand-blue transition-all duration-300 ease-out group-hover:w-4 rounded-full" />
+                      
+                      <span className="transform transition-transform duration-300 ease-out group-hover:translate-x-4 group-hover:text-brand-blue dark:group-hover:text-brand-yellow">
+                        {route.name}
+                      </span>
                     </Link>
                   </SheetClose>
                 ))}
-                <SheetClose asChild>
-                  <Button className="bg-brand-blue text-white hover:bg-brand-blue/90 font-bold text-lg py-6 rounded-none mt-4">
-                    <Link href = "/donate">
+                
+                {/* The Revamped, Contained Donate Button */}
+                <div className="pt-4 flex"> {/* Changed to flex so the button doesn't stretch */}
+                  <SheetClose asChild>
+                    <Link href="/donate">
+                      {/* Removed w-full, added px-10 to make it a nice pill shape */}
+                      <Button className="bg-brand-blue text-white hover:bg-black dark:hover:bg-white dark:hover:text-black font-black text-xl py-6 px-10 rounded-3xl transition-all shadow-[0_8px_30px_rgb(59,130,246,0.3)] hover:-translate-y-1 hover:scale-[1.02] active:scale-95">
                         Donate
+                      </Button>
                     </Link>
-                  </Button>
-                </SheetClose>
+                  </SheetClose>
+                </div>
               </nav>
             </SheetContent>
           </Sheet>

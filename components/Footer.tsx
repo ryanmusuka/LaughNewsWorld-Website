@@ -10,6 +10,7 @@ export default function Footer() {
     { name: "The LNW Chronicle", href: "/blog" },
     { name: "Watch LNW", href: "/watch" },
     { name: "Advertise Your Business", href: "/advertise" },
+    { name: "Shop", href: "/shop" },
     { name: "Donate", href: "/donate" },
   ];
 
