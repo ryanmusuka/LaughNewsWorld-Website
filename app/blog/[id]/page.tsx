@@ -6,6 +6,8 @@ import { motion, Variants } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Script from "next/script";
+import GoogleAd from "@/components/GoogleAd";
 
 // 1. ANIMATION SETTINGS
 const fadeUp: Variants = {
@@ -31,7 +33,7 @@ function extractQuote(paragraph: string) {
   return { quote, remainder };
 }
 
-// 2. MOCK DATABASE 
+// 2. MOCK DATABASE (FULLY RESTORED)
 const mockDatabase = [
   {
     id: "1",
@@ -143,142 +145,157 @@ export default function ArticlePage() {
   const params = useParams();
   const post = mockDatabase.find(p => p.id === params.id) || mockDatabase[0];
 
+  const AD_CLIENT = "ca-pub-2550346576190821"; 
+  const IN_ARTICLE_SLOT = "8345058401";
+  const SIDEBAR_SLOT = "6565072879";
+  const BOTTOM_SLOT = "3333333333";
+
   return (
-    <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 text-black dark:text-white pt-28 pb-16 px-6">
-      
-      {/* TOP NAVIGATION */}
-      <div className="max-w-4xl mx-auto mb-10">
-        <Link href="/blog" className="inline-flex items-center gap-2 text-zinc-500 hover:text-brand-blue font-bold uppercase tracking-widest text-xs transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-          Back to Front Page
-        </Link>
-      </div>
+    <>
+      <Script
+        id="adsense-init"
+        strategy="afterInteractive"
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${AD_CLIENT}`}
+        crossOrigin="anonymous"
+      />
 
-      <article className="max-w-4xl mx-auto space-y-12">
+      <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 text-black dark:text-white pt-28 pb-16 px-6">
         
-        {/* HEADER SECTION */}
-        <motion.header 
-          initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-          className="space-y-6 text-center max-w-3xl mx-auto"
-        >
-          <motion.div variants={fadeUp}>
-            <span className="bg-brand-yellow text-black px-3 py-1 text-xs font-black uppercase tracking-widest">
-              {post.category}
-            </span>
-          </motion.div>
+        <div className="max-w-6xl mx-auto mb-10">
+          <Link href="/blog" className="inline-flex items-center gap-2 text-zinc-500 hover:text-brand-blue font-bold uppercase tracking-widest text-xs transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Front Page
+          </Link>
+        </div>
+
+        <article className="w-full">
           
-          <motion.h1 variants={fadeUp} className="text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tighter leading-[1.05]">
-            {post.title}
-          </motion.h1>
+          <motion.header 
+            initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+            className="space-y-6 text-center max-w-4xl mx-auto mb-12"
+          >
+            <motion.div variants={fadeUp}>
+              <span className="bg-brand-yellow text-black px-3 py-1 text-xs font-black uppercase tracking-widest">
+                {post.category}
+              </span>
+            </motion.div>
+            
+            <motion.h1 variants={fadeUp} className="text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tighter leading-[1.05]">
+              {post.title}
+            </motion.h1>
 
-          <motion.div variants={fadeUp} className="flex items-center justify-center gap-4 text-xs font-bold text-zinc-400 uppercase tracking-widest pt-4 border-t-2 border-zinc-200 dark:border-zinc-800 w-fit mx-auto">
-            <span>By {post.author}</span>
-            <span>•</span>
-            <span>{post.date}</span>
-            <span>•</span>
-            <span>{post.readTime}</span>
+            <motion.div variants={fadeUp} className="flex items-center justify-center gap-4 text-xs font-bold text-zinc-400 uppercase tracking-widest pt-4 border-t-2 border-zinc-200 dark:border-zinc-800 w-fit mx-auto">
+              <span>By {post.author}</span><span>•</span><span>{post.date}</span><span>•</span><span>{post.readTime}</span>
+            </motion.div>
+          </motion.header>
+
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            className="w-full max-w-5xl mx-auto aspect-video md:aspect-[21/9] bg-zinc-200 overflow-hidden border-2 border-black dark:border-zinc-800 mb-16"
+          >
+            <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
           </motion.div>
-        </motion.header>
 
-        {/* HERO IMAGE */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
-          className="w-full aspect-video md:aspect-[21/9] bg-zinc-200 overflow-hidden border-2 border-black dark:border-zinc-800"
-        >
-          <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
-        </motion.div>
+          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12">
+            
+            <div className="lg:col-span-8">
+              
+              <motion.div 
+                initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.15 } } }}
+                className="space-y-8 pb-10"
+              >
+                {post.content.map((paragraph, index) => {
+                  
+                  const showDynamicInFeedAd = (index + 1) % 3 === 0 && index !== post.content.length - 1;
 
-        {/* THE SMART AUTO-FORMATTER */}
-        <motion.div 
-          initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.15 } } }}
-          className="max-w-2xl mx-auto space-y-8 pb-10"
-        >
-          {post.content.map((paragraph, index) => {
-            if (index === 2) {
-              const { quote, remainder } = extractQuote(paragraph);
-              return (
-                <div key={index} className="space-y-8">
-                  <motion.div variants={fadeUp} className="pl-6 border-l-4 border-zinc-300 dark:border-zinc-700 py-2 my-10">
-                    <p className="text-xl font-bold italic text-zinc-600 dark:text-zinc-400">
-                      &quot;{quote}&quot;
-                    </p>
-                  </motion.div>
-                  {remainder && (
-                    <motion.p variants={fadeUp} className="text-lg md:text-xl text-zinc-800 dark:text-zinc-300 leading-relaxed font-serif">
-                      {remainder}
-                    </motion.p>
-                  )}
+                  return (
+                    <div key={index} className="space-y-8">
+                      {index === 2 ? (
+                        <motion.div variants={fadeUp} className="pl-6 border-l-4 border-zinc-300 dark:border-zinc-700 py-2 my-10">
+                          <p className="text-xl font-bold italic text-zinc-600 dark:text-zinc-400">&quot;{extractQuote(paragraph).quote}&quot;</p>
+                          {extractQuote(paragraph).remainder && <p className="text-lg md:text-xl text-zinc-800 dark:text-zinc-300 leading-relaxed font-serif mt-4">{extractQuote(paragraph).remainder}</p>}
+                        </motion.div>
+                      ) : index === 4 ? (
+                        <motion.div variants={fadeUp} className="space-y-8">
+                          <blockquote className="text-3xl md:text-4xl lg:text-5xl font-black italic tracking-tight border-l-[8px] border-brand-yellow pl-6 py-2 my-16 text-brand-blue dark:text-brand-blue leading-[1.1]">
+                            &quot;{extractQuote(paragraph).quote}&quot;
+                          </blockquote>
+                          {extractQuote(paragraph).remainder && <p className="text-lg md:text-xl text-zinc-800 dark:text-zinc-300 leading-relaxed font-serif mt-4">{extractQuote(paragraph).remainder}</p>}
+                        </motion.div>
+                      ) : (
+                        <motion.p variants={fadeUp} className="text-lg md:text-xl text-zinc-800 dark:text-zinc-300 leading-relaxed font-serif">
+                          {paragraph}
+                        </motion.p>
+                      )}
+
+                      {showDynamicInFeedAd && (
+                        <motion.div variants={fadeUp} className="py-6 my-8 w-full border-y border-zinc-200 dark:border-zinc-800">
+                          <p className="text-[10px] uppercase tracking-widest text-zinc-400 text-center mb-2">Advertisement</p>
+                          <GoogleAd adClient={AD_CLIENT} adSlot={IN_ARTICLE_SLOT} layout="horizontal" />
+                        </motion.div>
+                      )}
+                    </div>
+                  );
+                })}
+              </motion.div>
+
+              <motion.div 
+                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
+                className="pt-4 pb-12 w-full"
+              >
+                <p className="text-[10px] uppercase tracking-widest text-zinc-400 text-center mb-2">Advertisement</p>
+                <GoogleAd adClient={AD_CLIENT} adSlot={BOTTOM_SLOT} layout="horizontal" />
+              </motion.div>
+
+              {post.youtubeVideoId && (
+                <motion.div 
+                  initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
+                  className="w-full pt-6 pb-12"
+                >
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="bg-brand-blue p-3 rounded-full text-white"><Play className="w-6 h-6 fill-current" /></div>
+                    <div>
+                      <h3 className="text-2xl font-black uppercase tracking-tighter leading-none">Watch The Moment</h3>
+                      <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs mt-1">Directly from the archive</p>
+                    </div>
+                  </div>
+                  <LazyYouTubePlayer videoId={post.youtubeVideoId} />
+                </motion.div>
+              )}
+
+            </div>
+
+            <aside className="hidden lg:block lg:col-span-4 relative">
+              <div className="sticky top-32 space-y-8">
+                <div className="w-full border-l border-zinc-200 dark:border-zinc-800 pl-8">
+                  <p className="text-[10px] uppercase tracking-widest text-zinc-400 mb-2 pb-2">Advertisement</p>
+                  <GoogleAd adClient={AD_CLIENT} adSlot={SIDEBAR_SLOT} layout="vertical" />
                 </div>
-              );
-            }
+              </div>
+            </aside>
 
-            if (index === 4) {
-              const { quote, remainder } = extractQuote(paragraph);
-              return (
-                <div key={index} className="space-y-8">
-                  <motion.blockquote variants={fadeUp} className="text-3xl md:text-4xl lg:text-5xl font-black italic tracking-tight border-l-[8px] border-brand-yellow pl-6 py-2 my-16 text-brand-blue dark:text-brand-blue leading-[1.1]">
-                    &quot;{quote}&quot;
-                  </motion.blockquote>
-                  {remainder && (
-                    <motion.p variants={fadeUp} className="text-lg md:text-xl text-zinc-800 dark:text-zinc-300 leading-relaxed font-serif">
-                      {remainder}
-                    </motion.p>
-                  )}
-                </div>
-              );
-            }
+          </div>
 
-            return (
-              <motion.p key={index} variants={fadeUp} className="text-lg md:text-xl text-zinc-800 dark:text-zinc-300 leading-relaxed font-serif">
-                {paragraph}
-              </motion.p>
-            );
-          })}
-        </motion.div>
-
-        {/* CONDITIONALLY RENDERED LAZY VIDEO SECTION */}
-        {post.youtubeVideoId && (
           <motion.div 
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-            className="max-w-3xl mx-auto pt-6 pb-12"
+            className="max-w-2xl mx-auto pt-10 mt-10 border-t-4 border-black dark:border-white text-center"
           >
-            <div className="flex items-center gap-4 mb-6">
-              <div className="bg-brand-blue p-3 rounded-full text-white">
-                <Play className="w-6 h-6 fill-current" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-black uppercase tracking-tighter leading-none">Watch The Moment</h3>
-                <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs mt-1">Directly from the archive</p>
-              </div>
-            </div>
-            
-            <LazyYouTubePlayer videoId={post.youtubeVideoId} />
+            <h3 className="text-2xl font-black uppercase tracking-tighter mb-6">Want more laughs?</h3>
+            <Button asChild size="lg" className="bg-black text-white hover:bg-brand-yellow hover:text-black dark:bg-white dark:text-black dark:hover:bg-brand-yellow font-black text-lg px-8 py-6 rounded-none border-2 border-transparent hover:border-black transition-all uppercase tracking-widest">
+              <Link href="/watch">Head to the Watch Page</Link>
+            </Button>
           </motion.div>
-        )}
 
-        {/* FOOTER CTA */}
-        <motion.div 
-          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-          className="max-w-2xl mx-auto pt-10 border-t-4 border-black dark:border-white text-center"
-        >
-          <h3 className="text-2xl font-black uppercase tracking-tighter mb-6">Want more laughs?</h3>
-          <Button asChild size="lg" className="bg-black text-white hover:bg-brand-yellow hover:text-black dark:bg-white dark:text-black dark:hover:bg-brand-yellow font-black text-lg px-8 py-6 rounded-none border-2 border-transparent hover:border-black transition-all uppercase tracking-widest">
-            <Link href="/watch">
-              Head to the Watch Page
-            </Link>
-          </Button>
-        </motion.div>
-
-      </article>
-    </main>
+        </article>
+      </main>
+    </>
   );
 }
 
 // -----------------------------------------------------------------
 // REUSABLE LAZY VIDEO PLAYER COMPONENT
-// This keeps the site fast by only loading the iframe WHEN clicked!
 // -----------------------------------------------------------------
 function LazyYouTubePlayer({ videoId }: { videoId: string }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -290,13 +307,11 @@ function LazyYouTubePlayer({ videoId }: { videoId: string }) {
     >
       {!isPlaying ? (
         <>
-          {/* High Quality YouTube Thumbnail */}
           <img 
             src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`} 
             alt="Video Thumbnail" 
             className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300"
           />
-          {/* Giant Play Button Overlay */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="bg-brand-yellow text-black p-5 rounded-full group-hover:scale-110 shadow-xl transition-transform duration-300">
               <Play className="w-8 h-8 fill-current ml-1" />
@@ -304,7 +319,6 @@ function LazyYouTubePlayer({ videoId }: { videoId: string }) {
           </div>
         </>
       ) : (
-        /* The actual video player loads exactly here when clicked */
         <iframe 
           src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`} 
           title="YouTube video player" 

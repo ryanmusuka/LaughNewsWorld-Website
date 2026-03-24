@@ -185,9 +185,9 @@ export default function AdvertisePage() {
           <motion.h2 variants={fadeUp} className="text-3xl font-black uppercase tracking-tighter text-center mb-12">How It Works</motion.h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { step: "01", title: "Choose Your Package", desc: "Select the ad type and platform that best fits your marketing goals." },
-              { step: "02", title: "Submit Your Creative", desc: "Send us your video, logo, or image along with your desired caption for review." },
-              { step: "03", title: "Publish & Promote", desc: "Upon approval and payment, our team seamlessly integrates and pushes your ad to the timeline." }
+              { step: "1", title: "Choose Your Package", desc: "Select the ad type and platform that best fits your marketing goals." },
+              { step: "2", title: "Submit Your Creative", desc: "Send us your video, logo, or image along with your desired caption for review." },
+              { step: "3", title: "Publish & Promote", desc: "Upon approval and payment, our team seamlessly integrates and pushes your ad to the timeline." }
             ].map((item, i) => (
               <motion.div key={i} variants={fadeUp} className="relative">
                 <div className="text-6xl font-black text-black/5 dark:text-white/10 absolute -top-6 -left-4 z-0">{item.step}</div>

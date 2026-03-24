@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
@@ -6,6 +7,8 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { Search } from "lucide-react";
+import Script from "next/script"; // Imported for isolated AdSense
+import GoogleAd from "@/components/GoogleAd"; // Imported your reusable Ad component
 
 const blogPosts = [
   {
@@ -83,134 +86,154 @@ export default function NewsPage() {
     post.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // AdSense Configuration
+  const AD_CLIENT = "ca-pub-2550346576190821"; 
+  const FEED_SLOT = "8345058401"; 
+
   return (
-    <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 pt-12 pb-12 px-6 font-sans">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* HEADER & SEARCH ROW */}
-        <header className="flex flex-col md:flex-row md:items-end justify-between border-b-4 border-black dark:border-white pb-6 mb-10 gap-1">
-          <div>
-            <motion.h1 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none"
-            >
-              The <span className="text-brand-blue">Front</span> Page
-            </motion.h1>
-            <p className="text-zinc-500 font-bold mt-2 uppercase tracking-widest text-sm">
-              The Latest Articles from The LNW Team • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-            </p>
-          </div>
+    <>
+      {/* TARGETED SCRIPT INJECTION: Only loads on the Blog Main Page */}
+      <Script
+        id="adsense-blog-index-init"
+        strategy="afterInteractive"
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${AD_CLIENT}`}
+        crossOrigin="anonymous"
+      />
 
-          {/* Search Bar */}
-          <div className="relative w-full md:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-            <input 
-              type="text"
-              placeholder="Search articles..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-none focus:outline-none focus:border-black dark:focus:border-white transition-colors font-bold uppercase text-sm tracking-wide"
-            />
-          </div>
-        </header>
-
-        {/* SEARCH RESULTS (If user is typing) */}
-        {searchQuery ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPosts.length > 0 ? filteredPosts.map(post => (
-              <ArticleCard key={post.id} post={post} />
-            )) : (
-              <p className="col-span-full text-center text-zinc-500 font-bold uppercase py-20">No articles found for "{searchQuery}"</p>
-            )}
-          </div>
-        ) : (
+      <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 pt-12 pb-12 px-6 font-sans">
+        <div className="max-w-7xl mx-auto">
           
-          /* NORMAL NEWSROOM LAYOUT (If search is empty) */
-          <div className="space-y-12">
+          {/* HEADER & SEARCH ROW */}
+          <header className="flex flex-col md:flex-row md:items-end justify-between border-b-4 border-black dark:border-white pb-6 mb-10 gap-1">
+            <div>
+              <motion.h1 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none"
+              >
+                The <span className="text-brand-blue">Front</span> Page
+              </motion.h1>
+              <p className="text-zinc-500 font-bold mt-2 uppercase tracking-widest text-sm">
+                The Latest Articles from The LNW Team • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+              </p>
+            </div>
+
+            {/* Search Bar */}
+            <div className="relative w-full md:w-72 mt-6 md:mt-0">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+              <input 
+                type="text"
+                placeholder="Search articles..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-none focus:outline-none focus:border-black dark:focus:border-white transition-colors font-bold uppercase text-sm tracking-wide"
+              />
+            </div>
+          </header>
+
+          {/* SEARCH RESULTS (If user is typing) */}
+          {searchQuery ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredPosts.length > 0 ? filteredPosts.map(post => (
+                <ArticleCard key={post.id} post={post} />
+              )) : (
+                <p className="col-span-full text-center text-zinc-500 font-bold uppercase py-20">No articles found for "{searchQuery}"</p>
+              )}
+            </div>
+          ) : (
             
-            {/* 1. THE FEATURED STORY (Massive layout) */}
-            {featuredPost && (
-              <section>
-                <Link href={`/blog/${featuredPost.id}`} className="group grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
-                  <div className="lg:col-span-8 overflow-hidden bg-zinc-200 aspect-video relative border border-zinc-200 dark:border-zinc-800">
-                    <img 
-                      src={featuredPost.image} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                      alt={featuredPost.title} 
-                    />
-                    {/* Live/Breaking Badge overlay */}
-                    <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 flex items-center gap-2 font-black uppercase tracking-widest text-xs">
-                      <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-                      Latest
+            /* NORMAL NEWSROOM LAYOUT (If search is empty) */
+            <div className="space-y-12">
+              
+              {/* 1. THE FEATURED STORY (Massive layout) */}
+              {featuredPost && (
+                <section>
+                  <Link href={`/blog/${featuredPost.id}`} className="group grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
+                    <div className="lg:col-span-8 overflow-hidden bg-zinc-200 aspect-video relative border border-zinc-200 dark:border-zinc-800">
+                      <img 
+                        src={featuredPost.image} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                        alt={featuredPost.title} 
+                      />
+                      {/* Live/Breaking Badge overlay */}
+                      <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 flex items-center gap-2 font-black uppercase tracking-widest text-xs">
+                        <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                        Latest
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="lg:col-span-4 space-y-4 flex flex-col justify-center h-full pt-2">
-                    <span className="text-brand-blue font-black uppercase tracking-widest text-sm">
-                      {featuredPost.category}
-                    </span>
-                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter leading-[0.9] group-hover:text-brand-blue transition-colors">
-                      {featuredPost.title}
-                    </h2>
-                    {/* Notice the font-serif here for the elegant news reading feel */}
-                    <p className="text-zinc-600 dark:text-zinc-400 text-lg md:text-xl font-serif leading-relaxed">
-                      {featuredPost.excerpt}
-                    </p>
-                    <div className="flex items-center gap-3 text-xs font-bold text-zinc-400 uppercase tracking-wider pt-2 border-t border-zinc-200 dark:border-zinc-800">
-                      <span>{featuredPost.date}</span>
-                      <span>|</span>
-                      <span>{featuredPost.readTime}</span>
-                    </div>
-                  </div>
-                </Link>
-              </section>
-            )}
-
-            <hr className="border-t-2 border-black dark:border-white" />
-
-            {/* 2. TRENDING ROW (3 Columns) */}
-            <section>
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-black uppercase tracking-tighter">Trending Now</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {trendingPosts.map(post => (
-                  <ArticleCard key={post.id} post={post} />
-                ))}
-              </div>
-            </section>
-
-            <hr className="border-t border-zinc-300 dark:border-zinc-800" />
-
-            {/* 3. ARCHIVE FEED (2 Columns - Horizontal Layout on Desktop) */}
-            <section>
-              <h3 className="text-2xl font-black uppercase tracking-tighter mb-6">More Stories</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-                {archivePosts.map((post) => (
-                  <Link key={post.id} href={`/blog/${post.id}`} className="group flex flex-col sm:flex-row gap-6 items-start">
-                    <div className="w-full sm:w-48 shrink-0 aspect-[4/3] sm:aspect-square overflow-hidden bg-zinc-100">
-                      <img src={post.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={post.title} />
-                    </div>
-                    <div className="space-y-2 pt-1">
-                      <span className="bg-brand-yellow text-black px-2 py-0.5 text-[10px] font-black uppercase tracking-widest inline-block mb-1">
-                        {post.category}
+                    
+                    <div className="lg:col-span-4 space-y-4 flex flex-col justify-center h-full pt-2">
+                      <span className="text-brand-blue font-black uppercase tracking-widest text-sm">
+                        {featuredPost.category}
                       </span>
-                      <h4 className="text-xl font-black uppercase tracking-tighter leading-tight group-hover:underline decoration-2 underline-offset-4">
-                        {post.title}
-                      </h4>
-                      <p className="text-zinc-500 dark:text-zinc-400 font-serif text-sm line-clamp-2">{post.excerpt}</p>
-                      <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider pt-2">{post.date}</p>
+                      <h2 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter leading-[0.9] group-hover:text-brand-blue transition-colors">
+                        {featuredPost.title}
+                      </h2>
+                      {/* Notice the font-serif here for the elegant news reading feel */}
+                      <p className="text-zinc-600 dark:text-zinc-400 text-lg md:text-xl font-serif leading-relaxed">
+                        {featuredPost.excerpt}
+                      </p>
+                      <div className="flex items-center gap-3 text-xs font-bold text-zinc-400 uppercase tracking-wider pt-2 border-t border-zinc-200 dark:border-zinc-800">
+                        <span>{featuredPost.date}</span>
+                        <span>|</span>
+                        <span>{featuredPost.readTime}</span>
+                      </div>
                     </div>
                   </Link>
-                ))}
-              </div>
-            </section>
+                </section>
+              )}
 
-          </div>
-        )}
-      </div>
-    </main>
+              <hr className="border-t-2 border-black dark:border-white" />
+
+              {/* 2. TRENDING ROW (3 Columns) */}
+              <section>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-black uppercase tracking-tighter">Trending Now</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {trendingPosts.map(post => (
+                    <ArticleCard key={post.id} post={post} />
+                  ))}
+                </div>
+              </section>
+
+              {/* ----------------------------------------------------------------- */}
+              {/* AD INJECTION: Exact placement between Trending and Archive Feed */}
+              {/* ----------------------------------------------------------------- */}
+              <div className="py-6 my-8 w-full border-y border-zinc-300 dark:border-zinc-800">
+                <p className="text-[10px] uppercase tracking-widest text-zinc-400 text-center mb-2">Advertisement</p>
+                <GoogleAd adClient={AD_CLIENT} adSlot={FEED_SLOT} layout="horizontal" />
+              </div>
+
+              {/* 3. ARCHIVE FEED (2 Columns - Horizontal Layout on Desktop) */}
+              <section>
+                <h3 className="text-2xl font-black uppercase tracking-tighter mb-6">More Stories</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+                  {archivePosts.map((post) => (
+                    <Link key={post.id} href={`/blog/${post.id}`} className="group flex flex-col sm:flex-row gap-6 items-start">
+                      <div className="w-full sm:w-48 shrink-0 aspect-[4/3] sm:aspect-square overflow-hidden bg-zinc-100">
+                        <img src={post.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={post.title} />
+                      </div>
+                      <div className="space-y-2 pt-1">
+                        <span className="bg-brand-yellow text-black px-2 py-0.5 text-[10px] font-black uppercase tracking-widest inline-block mb-1">
+                          {post.category}
+                        </span>
+                        <h4 className="text-xl font-black uppercase tracking-tighter leading-tight group-hover:underline decoration-2 underline-offset-4">
+                          {post.title}
+                        </h4>
+                        <p className="text-zinc-500 dark:text-zinc-400 font-serif text-sm line-clamp-2">{post.excerpt}</p>
+                        <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider pt-2">{post.date}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+
+            </div>
+          )}
+        </div>
+      </main>
+    </>
   );
 }
 
