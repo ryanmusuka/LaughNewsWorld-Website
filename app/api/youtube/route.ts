@@ -3,13 +3,11 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   const API_KEY = process.env.YOUTUBE_API_KEY;
-  console.log("🕵️ MY SECRET API KEY IS:", API_KEY);
 
   const LONG_VIDEOS_PLAYLIST_ID = "PLNgyrPQ_-1BG2nnJbbGNpc7zqYtnseWbC";
   const SHORTS_PLAYLIST_ID = "PLNgyrPQ_-1BGRa1LWazXjJ8xRwI2Q6Y5u";
 
   try {
-    // Fetch both playlists at the same time, cached for 3600 seconds (1 hour)
     const [longRes, shortsRes] = await Promise.all([
       fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=9&playlistId=${LONG_VIDEOS_PLAYLIST_ID}&key=${API_KEY}`, { next: { revalidate: 3600 } }),
       fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=9&playlistId=${SHORTS_PLAYLIST_ID}&key=${API_KEY}`, { next: { revalidate: 3600 } })

@@ -1,37 +1,30 @@
+// app/components/LatestNews.tsx (or wherever this lives)
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/server"; // <-- Import our DB Client
 
-// Mock Data: This represents what we will eventually fetch from Supabase
-const MOCK_NEWS = [
-  {
-    id: 1,
-    title: "UN Approves Puns for Diplomacy",
-    excerpt: "In a shocking turn of events, world leaders agree that a good Dad joke can de-escalate global tensions.",
-    imageUrl: "https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?q=80&w=800&auto=format&fit=crop",
-    date: "3 hours ago",
-    category: "Global"
-  },
-  {
-    id: 2,
-    title: "New Study: Laughing Increases Lifespan",
-    excerpt: "Scientists confirm what Proverbs 17:22 told us thousands of years ago: a joyful heart is good medicine.",
-    imageUrl: "https://images.unsplash.com/photo-1545696563-af8f6ec35b64?q=80&w=800&auto=format&fit=crop",
-    date: "5 hours ago",
-    category: "Science"
-  },
-  {
-    id: 3,
-    title: "Meme of the Week: Church Tech Team",
-    excerpt: "When the pastor says 'let's go to that one scripture' and you didn't have it prepared.",
-    imageUrl: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=800&auto=format&fit=crop",
-    date: "1 day ago",
-    category: "Church Culture"
+export default async function LatestNews() {
+  // 1. Initialize Supabase
+  const supabase = await createClient();
+
+  // 2. Fetch the 3 most recent published articles
+  const { data: articles, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("is_published", true)
+    .order("created_at", { ascending: false })
+    .limit(3);
+
+  if (error) {
+    console.error("Error fetching articles:", error);
+    // You could render a fallback UI here if the database fails
   }
-];
 
-export default function LatestNews() {
+  // Fallback to empty array if no data
+  const feed = articles || [];
+
   return (
     <section className="w-full py-16 px-6 md:py-24 bg-background">
       <div className="max-w-7xl mx-auto space-y-10">
@@ -42,55 +35,52 @@ export default function LatestNews() {
             <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter"><span className="text-brand-blue">Recent</span> Articles</h2>
             <p className="text-muted-foreground font-medium mt-2">Literary pieces from the LNW Team.</p>
           </div>
-          <Button className="hidden md:flex mt-4 md:mt-0 bg-brand-yellow text-white hover:bg-black/80 dark:text-black dark:hover:bg-white/80 font-bold text-lg px-8 py-6 rounded-none border-2 border-transparent transition-all hover:scale-105">
-            <Link href="/watch">
+          <Button asChild className="hidden md:flex mt-4 md:mt-0 bg-brand-yellow text-white hover:bg-black/80 dark:text-black dark:hover:bg-white/80 font-bold text-lg px-8 py-6 rounded-none border-2 border-transparent transition-all hover:scale-105">
+            <Link href="/blog">
                View All Articles
             </Link>
           </Button>
         </div>
 
-        {/* The CSS Grid - Mobile First Architecture */}
+        {/* The CSS Grid - dynamic data mapping */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {MOCK_NEWS.map((article) => (
-            <Card key={article.id} className="rounded-none border-2 border-border overflow-hidden group hover:border-primary transition-colors">
-              <div className="relative h-60 w-full overflow-hidden bg-muted">
-                <Image 
-                  src={article.imageUrl} 
-                  alt={article.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <CardHeader className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  <span className="text-brand-blue">{article.category}</span>
-                  <span>{article.date}</span>
+          {feed.map((article) => (
+            // IMPORTANT: We wrap the entire Card in a Link pointing to the SLUG
+            <Link href={`/blog/${article.slug}`} key={article.id} className="block group">
+              <Card className="rounded-none border-2 border-border overflow-hidden h-full hover:border-primary transition-colors cursor-pointer">
+                <div className="relative h-60 w-full overflow-hidden bg-muted">
+                  <Image 
+                    src={article.hero_image_url || "https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?q=80&w=800&auto=format&fit=crop"} 
+                    alt={article.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 </div>
-                <CardTitle className="text-2xl font-black leading-tight group-hover:text-primary transition-colors">
-                  {article.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground line-clamp-3">
-                  {article.excerpt}
-                </p>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full rounded-none border-2 font-bold hover:bg-primary hover:text-primary-foreground">
-                  Read Article
-                </Button>
-              </CardFooter>
-            </Card>
+                <CardHeader className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    <span className="text-brand-blue">News</span>
+                    {/* Format the date nicely */}
+                    <span>{new Date(article.created_at).toLocaleDateString()}</span>
+                  </div>
+                  <CardTitle className="text-2xl font-black leading-tight group-hover:text-primary transition-colors">
+                    {article.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground line-clamp-3">
+                    {/* If you add an 'excerpt' column later, use it here. For now, slice the content. */}
+                    {article.content.substring(0, 120)}...
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full rounded-none border-2 font-bold group-hover:bg-primary group-hover:text-primary-foreground">
+                    Read Article
+                  </Button>
+                </CardFooter>
+              </Card>
+            </Link>
           ))}
         </div>
-        
-        {/* Mobile-only "View All" Button */}
-        <div className="px-6 md:hidden">
-          <Button className="w-full bg-brand-blue text-white hover:bg-black/80 dark:text-black dark:hover:bg-white/80 font-bold text-lg px-8 py-6 rounded-none border-2 border-transparent transition-all hover:scale-105">
-            View More Articles
-          </Button>
-        </div>
-
       </div>
     </section>
   );
