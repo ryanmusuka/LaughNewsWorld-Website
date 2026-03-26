@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
 import { motion, Variants } from "framer-motion";
-import { TrendingUp, Users, PlayCircle, ShieldCheck, CheckCircle2, UploadCloud, File as FileIcon, X } from "lucide-react";
+import { TrendingUp, Users, PlayCircle, ShieldCheck, CheckCircle2, UploadCloud, File as FileIcon, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { createBrowserClient } from '@supabase/ssr';
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -25,28 +27,132 @@ const staggerContainer = {
 export default function AdvertisePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  
+  // Form State Management mapped to your new DB columns (conceptually)
+  const [formData, setFormData] = useState({
+    contact_name: "",
+    business_name: "",
+    email: "",
+    website_url: "",
+    ad_types: [] as string[],
+    caption: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{ type: 'idle' | 'success' | 'error', message: string }>({ type: 'idle', message: '' });
 
-  // This function simulates the upload progress bar
+  // Handle Text Inputs
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Handle Checkbox Toggles
+  const handlePackageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      ad_types: checked 
+        ? [...prev.ad_types, value] 
+        : prev.ad_types.filter(p => p !== value)
+    }));
+  };
+
+  // Handle form submission to Supabase
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!formData.contact_name || !formData.email || formData.ad_types.length === 0) {
+      setSubmitStatus({ type: 'error', message: 'Please fill in your name, email, and select at least one package.' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitStatus({ type: 'idle', message: '' });
+
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
+      let mediaUrl = null;
+
+      // 1. Upload File to Storage (If one was selected)
+      if (selectedFile) {
+        // Create a unique file name
+        const fileExt = selectedFile.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `ad-creatives/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('advertisements') // Keep this as your bucket name
+          .upload(filePath, selectedFile);
+
+        if (uploadError) throw new Error('Failed to upload file. Please try again.');
+
+        // Get the public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('advertisements')
+          .getPublicUrl(filePath);
+          
+        mediaUrl = publicUrl;
+      }
+
+      // 2. Save Data to Database using your EXACT column names
+      const { error: dbError } = await supabase
+        .from('advertisement_requests') // Replace with your actual table name if different
+        .insert([{
+          contact_name: formData.contact_name,
+          business_name: formData.business_name,
+          email: formData.email,
+          website_url: formData.website_url,
+          ad_types: formData.ad_types, // Expecting a text array in the DB
+          caption: formData.caption,
+          media_url: mediaUrl,
+          status: 'pending' 
+        }]);
+
+      if (dbError) throw new Error(`Database error: ${dbError.message}`);
+
+      // 3. Success State & Reset
+      setSubmitStatus({ type: 'success', message: 'Request submitted successfully! We will be in touch soon.' });
+      setFormData({ contact_name: "", business_name: "", email: "", website_url: "", ad_types: [], caption: "" });
+      setSelectedFile(null);
+      setUploadProgress(0);
+
+    } catch (error: any) {
+      setSubmitStatus({ type: 'error', message: error.message || 'An unexpected error occurred.' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Upload progress simulation
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
+      
+      if (file.size > 50 * 1024 * 1024) {
+        setSubmitStatus({ type: 'error', message: 'File is too large. Maximum size is 50MB.' });
+        return;
+      }
+
       setSelectedFile(file);
       setUploadProgress(0);
+      setSubmitStatus({ type: 'idle', message: '' });
 
-      // Simulate network upload
       const interval = setInterval(() => {
         setUploadProgress((prev) => {
           if (prev >= 100) {
             clearInterval(interval);
             return 100;
           }
-          return prev + 15; // Speed of the slider
+          return prev + 15;
         });
       }, 150);
     }
   };
 
-  // Helper to format bytes into KB or MB cleanly
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
@@ -58,7 +164,7 @@ export default function AdvertisePage() {
     <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 text-black dark:text-white pt-16 pb-20 px-6">
       <div className="max-w-7xl mx-auto space-y-24">
         
-        {/* 1. HERO HOOK */}
+        {/* HERO HOOK */}
         <motion.section 
           initial="hidden" animate="visible" variants={staggerContainer}
           className="max-w-4xl mx-auto text-center space-y-6"
@@ -74,7 +180,7 @@ export default function AdvertisePage() {
           </motion.p>
         </motion.section>
 
-        {/* 2. BY THE NUMBERS (Stats Cards) */}
+        {/* BY THE NUMBERS */}
         <motion.section 
           initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={staggerContainer}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
@@ -94,7 +200,7 @@ export default function AdvertisePage() {
           ))}
         </motion.section>
 
-        {/* 3. AD PACKAGES */}
+        {/* AD PACKAGES */}
         <motion.section initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="space-y-12">
           <motion.div variants={fadeUp} className="text-center max-w-2xl mx-auto">
             <h2 className="text-4xl font-black uppercase tracking-tighter mb-4">Your Investment</h2>
@@ -131,7 +237,7 @@ export default function AdvertisePage() {
               </ul>
             </motion.div>
 
-            {/* Category 2 (Highlighted) */}
+            {/* Category 2 */}
             <motion.div variants={fadeUp} className="bg-zinc-900 dark:bg-black border-4 border-brand-yellow rounded-3xl p-8 flex flex-col relative transform lg:-translate-y-4 shadow-2xl">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-yellow text-black font-black uppercase tracking-widest px-4 py-1 rounded-full text-xs">
                 Highest Engagement
@@ -180,7 +286,7 @@ export default function AdvertisePage() {
           </div>
         </motion.section>
 
-        {/* 4. HOW IT WORKS */}
+        {/* HOW IT WORKS */}
         <motion.section initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="bg-zinc-200 dark:bg-zinc-900 rounded-3xl p-4 md:p-4">
           <motion.h2 variants={fadeUp} className="text-3xl font-black uppercase tracking-tighter text-center mb-12">How It Works</motion.h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -201,7 +307,7 @@ export default function AdvertisePage() {
           </div>
         </motion.section>
 
-        {/* 5 & 6. BOOKING FORM & FINE PRINT */}
+        {/* BOOKING FORM & FINE PRINT */}
         <motion.section initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="max-w-3xl mx-auto space-y-8">
           
           <motion.div variants={fadeUp} className="text-center">
@@ -209,7 +315,7 @@ export default function AdvertisePage() {
             <p className="text-zinc-500 font-medium">Fill out the form below to initiate the review process.</p>
           </motion.div>
 
-          <motion.form variants={fadeUp} className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 p-6 md:p-10 rounded-3xl space-y-6">
+          <motion.form onSubmit={handleSubmit} variants={fadeUp} className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 p-6 md:p-10 rounded-3xl space-y-6">
             
             {/* Disclaimer Box */}
             <div className="bg-brand-blue/10 border-l-4 border-brand-blue p-4 rounded-r-lg">
@@ -218,39 +324,81 @@ export default function AdvertisePage() {
               </p>
             </div>
 
+            {/* Dynamic Status Messages */}
+            {submitStatus.type === 'success' && (
+              <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded text-sm font-bold">
+                {submitStatus.message}
+              </div>
+            )}
+            {submitStatus.type === 'error' && (
+              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded text-sm font-bold">
+                {submitStatus.message}
+              </div>
+            )}
+
             {/* Row 1: Name & Business */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold uppercase tracking-wider text-zinc-500">Your Name</label>
-                <input type="text" className="w-full bg-zinc-100 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-yellow transition-colors" placeholder="John Doe" />
+                <label className="text-sm font-bold uppercase tracking-wider text-zinc-500">Your Name *</label>
+                <input 
+                  type="text" 
+                  name="contact_name"
+                  value={formData.contact_name}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full bg-zinc-100 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-yellow transition-colors" 
+                  placeholder="John Doe" 
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold uppercase tracking-wider text-zinc-500">Business Name</label>
-                <input type="text" className="w-full bg-zinc-100 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-yellow transition-colors" placeholder="Acme Corp" />
+                <input 
+                  type="text" 
+                  name="business_name"
+                  value={formData.business_name}
+                  onChange={handleInputChange}
+                  className="w-full bg-zinc-100 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-yellow transition-colors" 
+                  placeholder="Acme Corp" 
+                />
               </div>
             </div>
 
             {/* Row 2: Email & Website */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold uppercase tracking-wider text-zinc-500">Email Address</label>
-                <input type="email" className="w-full bg-zinc-100 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-yellow transition-colors" placeholder="john@example.com" />
+                <label className="text-sm font-bold uppercase tracking-wider text-zinc-500">Email Address *</label>
+                <input 
+                  type="email" 
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full bg-zinc-100 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-yellow transition-colors" 
+                  placeholder="john@example.com" 
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold uppercase tracking-wider text-zinc-500">Website / Social Link</label>
-                <input type="text" className="w-full bg-zinc-100 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-yellow transition-colors" placeholder="https://yourwebsite.com" />
+                <input 
+                  type="text" 
+                  name="website_url"
+                  value={formData.website_url}
+                  onChange={handleInputChange}
+                  className="w-full bg-zinc-100 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-yellow transition-colors" 
+                  placeholder="https://yourwebsite.com" 
+                />
               </div>
             </div>
 
             {/* Row 3: Full-Width Selectable Package Cards */}
             <div className="space-y-3 pt-2">
-              <label className="text-sm font-bold uppercase tracking-wider text-zinc-500">Desired Packages (Select As Many As Desired)</label>
+              <label className="text-sm font-bold uppercase tracking-wider text-zinc-500">Desired Packages (Select As Many As Desired) *</label>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 
                 {/* Social Feed Options */}
                 <label className="relative flex items-start gap-3 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50 p-4 cursor-pointer hover:border-brand-yellow transition-all has-[:checked]:border-brand-yellow has-[:checked]:bg-brand-yellow/5">
-                  <input type="checkbox" value="story" className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-yellow focus:ring-brand-yellow dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer" />
+                  <input type="checkbox" value="story" checked={formData.ad_types.includes('story')} onChange={handlePackageChange} className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-yellow focus:ring-brand-yellow dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer" />
                   <div className="flex flex-col">
                     <span className="text-sm font-bold text-zinc-900 dark:text-white">£15 - Single Story Ad</span>
                     <span className="text-xs text-zinc-500 uppercase tracking-wider mt-1">Social Feed</span>
@@ -258,7 +406,7 @@ export default function AdvertisePage() {
                 </label>
 
                 <label className="relative flex items-start gap-3 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50 p-4 cursor-pointer hover:border-brand-yellow transition-all has-[:checked]:border-brand-yellow has-[:checked]:bg-brand-yellow/5">
-                  <input type="checkbox" value="feed-photo" className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-yellow focus:ring-brand-yellow dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer" />
+                  <input type="checkbox" value="feed-photo" checked={formData.ad_types.includes('feed-photo')} onChange={handlePackageChange} className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-yellow focus:ring-brand-yellow dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer" />
                   <div className="flex flex-col">
                     <span className="text-sm font-bold text-zinc-900 dark:text-white">£20 - Photo Ad + Desc</span>
                     <span className="text-xs text-zinc-500 uppercase tracking-wider mt-1">Social Feed</span>
@@ -266,7 +414,7 @@ export default function AdvertisePage() {
                 </label>
 
                 <label className="relative flex items-start gap-3 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50 p-4 cursor-pointer hover:border-brand-yellow transition-all has-[:checked]:border-brand-yellow has-[:checked]:bg-brand-yellow/5">
-                  <input type="checkbox" value="feed-video" className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-yellow focus:ring-brand-yellow dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer" />
+                  <input type="checkbox" value="feed-video" checked={formData.ad_types.includes('feed-video')} onChange={handlePackageChange} className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-yellow focus:ring-brand-yellow dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer" />
                   <div className="flex flex-col">
                     <span className="text-sm font-bold text-zinc-900 dark:text-white">£25 - Single Video Ad</span>
                     <span className="text-xs text-zinc-500 uppercase tracking-wider mt-1">Social Feed</span>
@@ -275,7 +423,7 @@ export default function AdvertisePage() {
 
                 {/* Reels Options */}
                 <label className="relative flex items-start gap-3 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50 p-4 cursor-pointer hover:border-brand-yellow transition-all has-[:checked]:border-brand-yellow has-[:checked]:bg-brand-yellow/5">
-                  <input type="checkbox" value="reel-post" className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-yellow focus:ring-brand-yellow dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer" />
+                  <input type="checkbox" value="reel-post" checked={formData.ad_types.includes('reel-post')} onChange={handlePackageChange} className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-yellow focus:ring-brand-yellow dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer" />
                   <div className="flex flex-col">
                     <span className="text-sm font-bold text-zinc-900 dark:text-white">£30 - Post-Roll Ad</span>
                     <span className="text-xs text-brand-blue dark:text-brand-yellow uppercase tracking-wider mt-1">Reels</span>
@@ -283,7 +431,7 @@ export default function AdvertisePage() {
                 </label>
 
                 <label className="relative flex items-start gap-3 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50 p-4 cursor-pointer hover:border-brand-yellow transition-all has-[:checked]:border-brand-yellow has-[:checked]:bg-brand-yellow/5">
-                  <input type="checkbox" value="reel-watermark" className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-yellow focus:ring-brand-yellow dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer" />
+                  <input type="checkbox" value="reel-watermark" checked={formData.ad_types.includes('reel-watermark')} onChange={handlePackageChange} className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-yellow focus:ring-brand-yellow dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer" />
                   <div className="flex flex-col">
                     <span className="text-sm font-bold text-zinc-900 dark:text-white">£35 - Watermark + Desc</span>
                     <span className="text-xs text-brand-blue dark:text-brand-yellow uppercase tracking-wider mt-1">Reels</span>
@@ -291,7 +439,7 @@ export default function AdvertisePage() {
                 </label>
 
                 <label className="relative flex items-start gap-3 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50 p-4 cursor-pointer hover:border-brand-yellow transition-all has-[:checked]:border-brand-yellow has-[:checked]:bg-brand-yellow/5">
-                  <input type="checkbox" value="reel-ultimate" className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-yellow focus:ring-brand-yellow dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer" />
+                  <input type="checkbox" value="reel-ultimate" checked={formData.ad_types.includes('reel-ultimate')} onChange={handlePackageChange} className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand-yellow focus:ring-brand-yellow dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer" />
                   <div className="flex flex-col">
                     <span className="text-sm font-bold text-zinc-900 dark:text-white">£45 - Ultimate Reel</span>
                     <span className="text-xs text-brand-blue dark:text-brand-yellow uppercase tracking-wider mt-1">Reels</span>
@@ -300,7 +448,7 @@ export default function AdvertisePage() {
 
                 {/* YouTube Option */}
                 <label className="relative flex items-start gap-3 rounded-xl border-2 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50 p-4 cursor-pointer hover:border-brand-yellow transition-all has-[:checked]:border-brand-yellow has-[:checked]:bg-brand-yellow/5 sm:col-span-2 md:col-span-3 lg:col-span-1">
-                  <input type="checkbox" value="yt-midroll" className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-[#FF0000] focus:ring-[#FF0000] dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer" />
+                  <input type="checkbox" value="yt-midroll" checked={formData.ad_types.includes('yt-midroll')} onChange={handlePackageChange} className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-[#FF0000] focus:ring-[#FF0000] dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer" />
                   <div className="flex flex-col">
                     <span className="text-sm font-bold text-zinc-900 dark:text-white">£50 - Video Integration</span>
                     <span className="text-xs text-[#FF0000] uppercase tracking-wider mt-1">YouTube</span>
@@ -314,6 +462,9 @@ export default function AdvertisePage() {
             <div className="space-y-2 pt-2">
               <label className="text-sm font-bold uppercase tracking-wider text-zinc-500">Desired Caption / Ad Copy</label>
               <textarea 
+                name="caption"
+                value={formData.caption}
+                onChange={handleInputChange}
                 className="w-full bg-zinc-100 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-yellow transition-colors min-h-[120px] resize-y" 
                 placeholder="Enter the exact text, tags, and hashtags you want included with your ad..."
               />
@@ -324,7 +475,6 @@ export default function AdvertisePage() {
               <label className="text-sm font-bold uppercase tracking-wider text-zinc-500">Upload Creative (Logo/Video/Image)</label>
               
               {!selectedFile ? (
-                /* The dashed dropzone (Only shows if no file is selected) */
                 <label className="block border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl p-8 text-center hover:bg-zinc-50 dark:hover:bg-zinc-950 transition-colors cursor-pointer group">
                   <input 
                     type="file" 
@@ -337,15 +487,12 @@ export default function AdvertisePage() {
                   <p className="text-xs text-zinc-400 mt-1">MP4, PNG, JPG up to 50MB</p>
                 </label>
               ) : (
-                /* The Active Upload State (Shows when file is picked) */
                 <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 bg-white dark:bg-zinc-900 shadow-sm relative overflow-hidden">
                   <div className="flex items-center gap-4">
-                    {/* File Icon */}
                     <div className="bg-brand-blue/10 p-3 rounded-lg text-brand-blue">
                       <FileIcon className="w-6 h-6" />
                     </div>
                     
-                    {/* File Info */}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-zinc-900 dark:text-white truncate">
                         {selectedFile.name}
@@ -354,24 +501,22 @@ export default function AdvertisePage() {
                         <span className="text-xs font-medium text-zinc-500">
                           {formatFileSize(selectedFile.size)}
                         </span>
-                        {/* Status text */}
                         <span className="text-xs font-bold text-brand-blue">
-                          {uploadProgress < 100 ? "Uploading..." : "Complete"}
+                          {uploadProgress < 100 ? "Loading preview..." : "Ready to submit"}
                         </span>
                       </div>
                     </div>
 
-                    {/* Remove File Button */}
                     <button 
                       type="button" 
                       onClick={() => setSelectedFile(null)}
-                      className="p-2 text-zinc-400 hover:text-[#FF0000] hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
+                      disabled={isSubmitting}
+                      className="p-2 text-zinc-400 hover:text-[#FF0000] hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors disabled:opacity-50"
                     >
                       <X className="w-5 h-5" />
                     </button>
                   </div>
 
-                  {/* Google Docs-Style Progress Bar */}
                   <div className="absolute bottom-0 left-0 w-full h-1 bg-zinc-100 dark:bg-zinc-800">
                     <div 
                       className="h-full bg-brand-blue transition-all duration-300 ease-out" 
@@ -383,8 +528,19 @@ export default function AdvertisePage() {
             </div>
 
             {/* Submit Button */}
-            <Button className="w-full bg-brand-yellow text-black hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black font-black text-lg py-6 rounded-xl transition-all mt-4">
-              Submit Request for Review
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="w-full bg-brand-yellow text-black hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black font-black text-lg py-6 rounded-xl transition-all mt-4 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Submitting Request...
+                </>
+              ) : (
+                "Submit Request for Review"
+              )}
             </Button>
 
             {/* Fine Print */}

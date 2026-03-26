@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { motion, Variants } from "framer-motion";
 import Link from "next/link";
-import { ArrowLeft, Play } from "lucide-react";
+import { ArrowLeft, Play, Loader2 } from "lucide-react"; // Added Loader2 for a sleek loading spinner
 import { Button } from "@/components/ui/button";
 import Script from "next/script";
 import GoogleAd from "@/components/GoogleAd";
+import { createBrowserClient } from '@supabase/ssr';
 
 // 1. ANIMATION SETTINGS
 const fadeUp: Variants = {
@@ -33,123 +35,94 @@ function extractQuote(paragraph: string) {
   return { quote, remainder };
 }
 
-// 2. MOCK DATABASE (FULLY RESTORED)
-const mockDatabase = [
-  {
-    id: "1",
-    category: "Revelation",
-    title: "Why Laughter is a Spiritual Weapon You're Not Using",
-    image: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?q=80&w=2500&auto=format&fit=crop",
-    date: "Oct 24, 2026",
-    readTime: "5 min read",
-    author: "LaughNewsWorld Team",
-    youtubeVideoId: "dQw4w9WgXcQ", 
-    content: [
-      "Joy is not just a reaction to good news; it is a prophetic declaration that the enemy has lost. For too long, religion has painted a picture of a somber, unsmiling God, but if we look closely at the scriptures, joy is listed as a fruit of the Spirit, right alongside love and peace.",
-      "Prophet Uebert Angel has consistently demonstrated that the anointing flows heavily in an atmosphere of joy. When you laugh, you are literally changing the molecular structure of the atmosphere around you. You are displacing heaviness.",
-      "The devil cannot function in an atmosphere of pure, unadulterated joy. It confuses his camp. When he expects you to cry over a situation, but you choose to laugh instead, you strip him of his power over your mind.",
-      "During a recent Sunday service, the Prophet cracked a joke right before a major deliverance session. Many wondered why he would do that before such a serious spiritual warfare moment.",
-      "Humour breaks down the walls of the flesh so the Gospel can walk right through the front door of the spirit. By disarming the congregation's religious guards, their spirits were left wide open to receive the miraculous. People who had been bound for years were suddenly laughing their way into freedom. It wasn't just a comedy show; it was a highly calculated spiritual strike.",
-      "So the next time you feel the weight of the world pressing down on you, don't just pray a sad prayer. Put on a sermon that makes you laugh. Watch a clip that brings you genuine joy. Let that godly laughter bubble up, and watch the walls of Jericho in your life come tumbling down."
-    ]
-  },
-  {
-    id: "2",
-    category: "Humor",
-    title: "The Science of Joy: What Happens in the Spirit?",
-    image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=1000&auto=format&fit=crop",
-    date: "Oct 22, 2026",
-    readTime: "4 min read",
-    author: "LaughNewsWorld Team",
-    content: [
-      "There is an actual science to what happens in the realm of the spirit when a believer decides to laugh. It's more than just a physical reflex; it is a spiritual frequency.",
-      "When we observe the patterns of major breakthroughs in the ministry, they are often preceded by intense moments of corporate laughter. This isn't a coincidence.",
-      "Laughter acts as a spiritual reset button. It clears the atmosphere of doubt, fear, and anxiety, making room for the prophetic word to land without interference.",
-      "We saw this vividly during the last crossover night. The tension of the old year was heavy, but one well-placed moment of humor shattered that tension entirely.",
-      "A joyful spirit is a receptive spirit. The moment you start laughing, your spiritual defenses drop, not to the enemy, but to the Holy Spirit. You stop trying to figure out how the miracle will happen and simply rest in the joy of the Lord.",
-      "Next time you need a breakthrough, try laughing first. It might just be the very key you've been looking for to unlock your next level."
-    ]
-  },
-  {
-    id: "3",
-    category: "Testimony",
-    title: "How One Joke Shifted the Atmosphere in London",
-    image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000&auto=format&fit=crop",
-    date: "Oct 20, 2026",
-    readTime: "3 min read",
-    author: "LaughNewsWorld Team",
-    content: [
-      "London has always been a hub of intense spiritual activity, but what happened last Sunday was entirely unexpected.",
-      "The service started with a heavy focus on deep spiritual warfare. The congregation was locked in, intense, and serious. But the Prophet knew something they didn't.",
-      "Sometimes the heaviest chains are broken by the lightest moments. He paused his teaching, looked at the crowd, and delivered a punchline that had the entire room erupting in laughter.",
-      "In that exact moment, the atmosphere shifted. It was palpable. The heavy cloud over the room dissipated, replaced by a tangible sense of liberty.",
-      "Joy is the ultimate act of spiritual defiance. By choosing to laugh in the face of demonic opposition, the congregation declared total victory before the prayer even finished.",
-      "Testimonies poured in the following week of spontaneous healings that occurred exactly during that moment of laughter. It stands as a testament to the power of prophetic joy."
-    ]
-  },
-  {
-    id: "4",
-    category: "Prophetic",
-    title: "Joy Cometh In The Morning: Understanding Times and Seasons",
-    image: "https://images.unsplash.com/photo-1444492417251-9c84a5fa18e0?q=80&w=1000&auto=format&fit=crop",
-    date: "Oct 18, 2026",
-    readTime: "6 min read",
-    author: "LaughNewsWorld Team",
-    content: [
-      "Weeping may endure for a night, but joy comes in the morning. This is not just a poetic scripture; it is a prophetic timetable.",
-      "Many believers get stuck in the night season because they refuse to acknowledge when the morning has arrived. The transition between seasons requires a change in your disposition.",
-      "You cannot enter your morning season with a night season attitude. You have to start rejoicing before you see the full manifestation of the daylight.",
-      "Prophet Angel often teaches on the necessity of aligning your emotions with your prophetic destination.",
-      "Your laughter is the alarm clock that signals your spirit it is morning. If you wait for everything to be perfect before you rejoice, you will miss the transition entirely. Faith rejoices in advance.",
-      "Start practicing your morning joy today. Let the enemy know your night is officially over."
-    ]
-  },
-  {
-    id: "5",
-    category: "Teaching",
-    title: "Don't Let The Enemy Steal Your Punchline",
-    image: "https://images.unsplash.com/photo-1529156069898-49953eb1b5ae?q=80&w=1000&auto=format&fit=crop",
-    date: "Oct 15, 2026",
-    readTime: "4 min read",
-    author: "LaughNewsWorld Team",
-    content: [
-      "The enemy is a master thief, and his favorite target isn't your money—it's your joy.",
-      "He knows that if he can take your joy, he can drain your strength. A joyless believer is a powerless believer, easy prey for discouragement.",
-      "Guarding your joy requires intentionality. It means refusing to engage with toxic conversations, doom-scrolling, or environments that drain your spirit.",
-      "This is why the culture of LaughNewsWorld is so vital. We provide an oasis of godly humor in a desert of bad news.",
-      "Your laugh is your spiritual signature. The devil hates it because it reminds him of his defeat at Calvary. Every time you smile through a storm, you are mocking his attempts to destroy you.",
-      "Keep your joy fiercely protected. It is one of the most valuable assets in your spiritual arsenal."
-    ]
-  },
-  {
-    id: "6",
-    category: "Humor",
-    title: "Top 5 Moments the Prophet Made Us Cry Laughing",
-    image: "https://images.unsplash.com/photo-1505236858219-8359eb29e329?q=80&w=1000&auto=format&fit=crop",
-    date: "Oct 10, 2026",
-    readTime: "2 min read",
-    author: "LaughNewsWorld Team",
-    youtubeVideoId: "jNQXAC9IVRw",
-    content: [
-      "If there is one thing we know for sure, it is that Prophet Uebert Angel has a masterclass sense of humor.",
-      "Over the past year, we have compiled the most unscripted, hilarious moments that caught the congregation completely off guard.",
-      "From his unique observations about married life to his legendary interactions with people on the prayerline, these moments are unforgettable.",
-      "Our team sat down and watched hundreds of hours of footage to narrow it down to the absolute best.",
-      "Laughter is the glue that binds a spiritual family together. Sharing these moments reminds us that while our mission is serious, we don't have to take ourselves too seriously. We are part of a family that knows how to rejoice.",
-      "Head over to our Watch page to see the full compilation video of these top 5 moments. You won't want to miss it!"
-    ]
-  }
-];
-
 export default function ArticlePage() {
   const params = useParams();
-  const post = mockDatabase.find(p => p.id === params.id) || mockDatabase[0];
+  const slug = params.slug as string; // Gets the URL parameter from the [slug] folder
+
+  // 2. STATE FOR DATABASE FETCHING
+  const [post, setPost] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   const AD_CLIENT = "ca-pub-2550346576190821"; 
   const IN_ARTICLE_SLOT = "8345058401";
   const SIDEBAR_SLOT = "6565072879";
   const BOTTOM_SLOT = "3333333333";
 
+  // 3. FETCH DATA FROM SUPABASE
+  useEffect(() => {
+    async function fetchPost() {
+      if (!slug) return;
+
+      // Initialize the browser client safely using your environment variables
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
+      // Query the database 
+      const { data, error } = await supabase
+        .from('blog_posts') 
+        .select('*')
+        .eq('slug', slug) 
+        .single();
+
+      console.log("=== SUPABASE PAYLOAD ===", data);
+      if (error) {
+        console.error("Error fetching article:", error);
+        setLoading(false);
+        return;
+      }
+
+      if (data) {
+        // Map the database response to match the exact format your UI expects
+        setPost({
+          ...data,
+          // Converts a single block of text from the DB into an array of paragraphs based on line breaks
+          content: Array.isArray(data.content) 
+            ? data.content 
+            : typeof data.content === 'string' 
+              ? data.content.split('\n').filter((p: string) => p.trim() !== '') 
+              : [],
+          // Formats PostgreSQL timestamp into 'Oct 24, 2026' format
+          date: new Date(data.created_at || data.date).toLocaleDateString('en-US', { 
+            month: 'short', day: 'numeric', year: 'numeric' 
+          }),
+          // Maps DB column names to UI variable names
+          image: data.hero_image_url || data.image,
+          readTime: data.read_time || "5 min read",
+          author: data.author || "LaughNewsWorld Team",
+          youtubeVideoId: data.youtube_video_id || data.youtubeVideoId || null,
+        });
+      }
+      setLoading(false);
+    }
+
+    fetchPost();
+  }, [slug]);
+
+  // 4. GRACEFUL LOADING & ERROR STATES
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 flex flex-col items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-brand-blue" />
+        <p className="mt-4 font-bold uppercase tracking-widest text-zinc-500 text-sm">Loading Article...</p>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 flex flex-col items-center justify-center text-center px-6">
+        <h1 className="text-4xl font-black uppercase tracking-tighter mb-4 text-black dark:text-white">Article Not Found</h1>
+        <p className="text-zinc-500 mb-8">We couldn&apos;t locate the article you were looking for.</p>
+        <Button asChild className="bg-brand-blue text-white rounded-none uppercase tracking-widest font-bold">
+          <Link href="/">Return Home</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  // 5. THE ORIGINAL UI (UNTOUCHED)
   return (
     <>
       <Script
@@ -162,7 +135,7 @@ export default function ArticlePage() {
       <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 text-black dark:text-white pt-28 pb-16 px-6">
         
         <div className="max-w-6xl mx-auto mb-10">
-          <Link href="/blog" className="inline-flex items-center gap-2 text-zinc-500 hover:text-brand-blue font-bold uppercase tracking-widest text-xs transition-colors">
+          <Link href="/" className="inline-flex items-center gap-2 text-zinc-500 hover:text-brand-blue font-bold uppercase tracking-widest text-xs transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Back to Front Page
           </Link>
@@ -174,11 +147,6 @@ export default function ArticlePage() {
             initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
             className="space-y-6 text-center max-w-4xl mx-auto mb-12"
           >
-            <motion.div variants={fadeUp}>
-              <span className="bg-brand-yellow text-black px-3 py-1 text-xs font-black uppercase tracking-widest">
-                {post.category}
-              </span>
-            </motion.div>
             
             <motion.h1 variants={fadeUp} className="text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tighter leading-[1.05]">
               {post.title}
@@ -206,7 +174,7 @@ export default function ArticlePage() {
                 initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.15 } } }}
                 className="space-y-8 pb-10"
               >
-                {post.content.map((paragraph, index) => {
+                {post.content.map((paragraph: string, index: number) => {
                   
                   const showDynamicInFeedAd = (index + 1) % 3 === 0 && index !== post.content.length - 1;
 

@@ -2,97 +2,103 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
-import { Search } from "lucide-react";
-import Script from "next/script"; // Imported for isolated AdSense
-import GoogleAd from "@/components/GoogleAd"; // Imported your reusable Ad component
-
-const blogPosts = [
-  {
-    id: "1",
-    category: "Revelation",
-    title: "Why Laughter is a Spiritual Weapon You're Not Using",
-    excerpt: "Prophet Uebert Angel breaks down the mystery of joy and how it dismantles the works of darkness in your daily life. Discover the prophetic power of a simple smile.",
-    image: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?q=80&w=2500&auto=format&fit=crop",
-    date: "Oct 24, 2026",
-    readTime: "5 min read",
-    featured: true
-  },
-  {
-    id: "2",
-    category: "Humor",
-    title: "The Science of Joy: What Happens in the Spirit?",
-    excerpt: "Exploring the intersection of physical laughter and spiritual breakthrough. When you laugh, the enemy gets confused.",
-    image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=1000&auto=format&fit=crop",
-    date: "Oct 22, 2026",
-    readTime: "4 min read",
-    featured: false
-  },
-  {
-    id: "3",
-    category: "Testimony",
-    title: "How One Joke Shifted the Atmosphere in London",
-    excerpt: "A firsthand account of the recent service where a simple punchline opened the heavens for massive deliverance.",
-    image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000&auto=format&fit=crop",
-    date: "Oct 20, 2026",
-    readTime: "3 min read",
-    featured: false
-  },
-  {
-    id: "4",
-    category: "Prophetic",
-    title: "Joy Cometh In The Morning: Understanding Times and Seasons",
-    excerpt: "You've survived the night, but are you ready for the morning? The prophetic timetable of joy is here.",
-    image: "https://images.unsplash.com/photo-1444492417251-9c84a5fa18e0?q=80&w=1000&auto=format&fit=crop",
-    date: "Oct 18, 2026",
-    readTime: "6 min read",
-    featured: false
-  },
-  {
-    id: "5",
-    category: "Teaching",
-    title: "Don't Let The Enemy Steal Your Punchline",
-    excerpt: "The devil hates a joyful believer. Here are three ways to protect your peace and maintain your laugh.",
-    image: "https://images.unsplash.com/photo-1529156069898-49953eb1b5ae?q=80&w=1000&auto=format&fit=crop",
-    date: "Oct 15, 2026",
-    readTime: "4 min read",
-    featured: false
-  },
-  {
-    id: "6",
-    category: "Humor",
-    title: "Top 5 Moments the Prophet Made Us Cry Laughing",
-    excerpt: "A definitive ranking of the most hilarious, unscripted moments from the altar this year.",
-    image: "https://images.unsplash.com/photo-1505236858219-8359eb29e329?q=80&w=1000&auto=format&fit=crop",
-    date: "Oct 10, 2026",
-    readTime: "2 min read",
-    featured: false
-  }
-];
+import { Search, Loader2 } from "lucide-react";
+import Script from "next/script";
+import GoogleAd from "@/components/GoogleAd";
+import { createBrowserClient } from '@supabase/ssr';
 
 export default function NewsPage() {
   const [searchQuery, setSearchQuery] = useState("");
-
-  const featuredPost = blogPosts.find(p => p.featured);
-  const trendingPosts = blogPosts.filter(p => !p.featured).slice(0, 3);
-  const archivePosts = blogPosts.filter(p => !p.featured).slice(3);
-
-  // Filter posts based on search
-  const filteredPosts = blogPosts.filter(post => 
-    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // AdSense Configuration
   const AD_CLIENT = "ca-pub-2550346576190821"; 
   const FEED_SLOT = "8345058401"; 
 
+  useEffect(() => {
+    async function fetchPosts() {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
+      // Fetch all articles from your database.
+       const { data, error } = await supabase
+        .from('blog_posts') 
+        .select('*')
+        .order('created_at', { ascending: false }); // Orders newest to oldest
+
+      if (error) {
+        console.error("Error fetching articles:", error);
+        setLoading(false);
+        return;
+      }
+
+      if (data) {
+        // Map database columns to our UI expectations
+        const mappedPosts = data.map((post: any) => ({
+          // Uses slug for the URL if it exists, otherwise falls back to ID
+          id: post.slug || post.id, 
+          category: post.category || post.topic || "News",
+          title: post.title,
+          excerpt: post.excerpt || "Click to read the full story...",
+          image: post.hero_image_url || "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?q=80&w=2500&auto=format&fit=crop",
+          date: new Date(post.created_at || post.date).toLocaleDateString('en-US', { 
+            month: 'short', day: 'numeric', year: 'numeric' 
+          }),
+          readTime: post.read_time || "5 min read",
+          featured: post.featured || post.is_featured || false,
+          views: post.views || 0, // Ensure we have a number for sorting
+        }));
+
+        setPosts(mappedPosts);
+      }
+      setLoading(false);
+    }
+
+    fetchPosts();
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // DYNAMIC SECTION LOGIC
+  // ---------------------------------------------------------------------------
+  
+  // 1. Featured Post: Finds the first post marked as featured, or just uses the newest one if none are marked.
+  const featuredPost = posts.find(p => p.featured) || posts[0];
+
+  // 2. Trending Posts: Sorts ALL posts by highest views, removes the featured post to avoid duplicates, and grabs the top 3.
+  const trendingPosts = [...posts]
+    .sort((a, b) => b.views - a.views)
+    .filter(p => p.id !== featuredPost?.id)
+    .slice(0, 3);
+
+  // 3. Archive Posts: The rest of the posts that are neither Featured nor in the top 3 Trending.
+  const trendingIds = trendingPosts.map(p => p.id);
+  const archivePosts = posts.filter(p => p.id !== featuredPost?.id && !trendingIds.includes(p.id));
+
+  // 4. Search Filter
+  const filteredPosts = posts.filter(post => 
+    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    post.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // ---------------------------------------------------------------------------
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 flex flex-col items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-brand-blue" />
+        <p className="mt-4 font-bold uppercase tracking-widest text-zinc-500 text-sm">Loading Newsroom...</p>
+      </div>
+    );
+  }
+
   return (
     <>
-      {/* TARGETED SCRIPT INJECTION: Only loads on the Blog Main Page */}
       <Script
         id="adsense-blog-index-init"
         strategy="afterInteractive"
@@ -100,11 +106,10 @@ export default function NewsPage() {
         crossOrigin="anonymous"
       />
 
-      <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 pt-12 pb-12 px-6 font-sans">
+      <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 pt-12 pb-12 px-6 font-sans text-black dark:text-white">
         <div className="max-w-7xl mx-auto">
           
-          {/* HEADER & SEARCH ROW */}
-          <header className="flex flex-col md:flex-row md:items-end justify-between border-b-4 border-black dark:border-white pb-6 mb-10 gap-1">
+          <header className="flex flex-col md:flex-row md:items-end justify-between border-b-4 border-black dark:border-white pb-6 mb-10 gap-1 mt-10">
             <div>
               <motion.h1 
                 initial={{ opacity: 0, x: -20 }}
@@ -118,7 +123,6 @@ export default function NewsPage() {
               </p>
             </div>
 
-            {/* Search Bar */}
             <div className="relative w-full md:w-72 mt-6 md:mt-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
               <input 
@@ -126,12 +130,11 @@ export default function NewsPage() {
                 placeholder="Search articles..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-none focus:outline-none focus:border-black dark:focus:border-white transition-colors font-bold uppercase text-sm tracking-wide"
+                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-none focus:outline-none focus:border-black dark:focus:border-white transition-colors font-bold uppercase text-sm tracking-wide text-black dark:text-white"
               />
             </div>
           </header>
 
-          {/* SEARCH RESULTS (If user is typing) */}
           {searchQuery ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredPosts.length > 0 ? filteredPosts.map(post => (
@@ -141,11 +144,8 @@ export default function NewsPage() {
               )}
             </div>
           ) : (
-            
-            /* NORMAL NEWSROOM LAYOUT (If search is empty) */
             <div className="space-y-12">
               
-              {/* 1. THE FEATURED STORY (Massive layout) */}
               {featuredPost && (
                 <section>
                   <Link href={`/blog/${featuredPost.id}`} className="group grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
@@ -155,7 +155,6 @@ export default function NewsPage() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                         alt={featuredPost.title} 
                       />
-                      {/* Live/Breaking Badge overlay */}
                       <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 flex items-center gap-2 font-black uppercase tracking-widest text-xs">
                         <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
                         Latest
@@ -169,8 +168,7 @@ export default function NewsPage() {
                       <h2 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter leading-[0.9] group-hover:text-brand-blue transition-colors">
                         {featuredPost.title}
                       </h2>
-                      {/* Notice the font-serif here for the elegant news reading feel */}
-                      <p className="text-zinc-600 dark:text-zinc-400 text-lg md:text-xl font-serif leading-relaxed">
+                      <p className="text-zinc-600 dark:text-zinc-400 text-lg md:text-xl font-serif leading-relaxed line-clamp-4">
                         {featuredPost.excerpt}
                       </p>
                       <div className="flex items-center gap-3 text-xs font-bold text-zinc-400 uppercase tracking-wider pt-2 border-t border-zinc-200 dark:border-zinc-800">
@@ -185,49 +183,50 @@ export default function NewsPage() {
 
               <hr className="border-t-2 border-black dark:border-white" />
 
-              {/* 2. TRENDING ROW (3 Columns) */}
-              <section>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-black uppercase tracking-tighter">Trending Now</h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {trendingPosts.map(post => (
-                    <ArticleCard key={post.id} post={post} />
-                  ))}
-                </div>
-              </section>
+              {/* TRENDING ROW sorted by Database Views */}
+              {trendingPosts.length > 0 && (
+                <section>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-2xl font-black uppercase tracking-tighter">Trending Now</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {trendingPosts.map(post => (
+                      <ArticleCard key={post.id} post={post} />
+                    ))}
+                  </div>
+                </section>
+              )}
 
-              {/* ----------------------------------------------------------------- */}
-              {/* AD INJECTION: Exact placement between Trending and Archive Feed */}
-              {/* ----------------------------------------------------------------- */}
               <div className="py-6 my-8 w-full border-y border-zinc-300 dark:border-zinc-800">
                 <p className="text-[10px] uppercase tracking-widest text-zinc-400 text-center mb-2">Advertisement</p>
                 <GoogleAd adClient={AD_CLIENT} adSlot={FEED_SLOT} layout="horizontal" />
               </div>
 
-              {/* 3. ARCHIVE FEED (2 Columns - Horizontal Layout on Desktop) */}
-              <section>
-                <h3 className="text-2xl font-black uppercase tracking-tighter mb-6">More Stories</h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-                  {archivePosts.map((post) => (
-                    <Link key={post.id} href={`/blog/${post.id}`} className="group flex flex-col sm:flex-row gap-6 items-start">
-                      <div className="w-full sm:w-48 shrink-0 aspect-[4/3] sm:aspect-square overflow-hidden bg-zinc-100">
-                        <img src={post.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={post.title} />
-                      </div>
-                      <div className="space-y-2 pt-1">
-                        <span className="bg-brand-yellow text-black px-2 py-0.5 text-[10px] font-black uppercase tracking-widest inline-block mb-1">
-                          {post.category}
-                        </span>
-                        <h4 className="text-xl font-black uppercase tracking-tighter leading-tight group-hover:underline decoration-2 underline-offset-4">
-                          {post.title}
-                        </h4>
-                        <p className="text-zinc-500 dark:text-zinc-400 font-serif text-sm line-clamp-2">{post.excerpt}</p>
-                        <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider pt-2">{post.date}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </section>
+              {/* ARCHIVE FEED */}
+              {archivePosts.length > 0 && (
+                <section>
+                  <h3 className="text-2xl font-black uppercase tracking-tighter mb-6">More Stories</h3>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+                    {archivePosts.map((post) => (
+                      <Link key={post.id} href={`/blog/${post.id}`} className="group flex flex-col sm:flex-row gap-6 items-start">
+                        <div className="w-full sm:w-48 shrink-0 aspect-[4/3] sm:aspect-square overflow-hidden bg-zinc-100">
+                          <img src={post.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={post.title} />
+                        </div>
+                        <div className="space-y-2 pt-1">
+                          <span className="bg-brand-yellow text-black px-2 py-0.5 text-[10px] font-black uppercase tracking-widest inline-block mb-1">
+                            {post.category}
+                          </span>
+                          <h4 className="text-xl font-black uppercase tracking-tighter leading-tight group-hover:underline decoration-2 underline-offset-4">
+                            {post.title}
+                          </h4>
+                          <p className="text-zinc-500 dark:text-zinc-400 font-serif text-sm line-clamp-2">{post.excerpt}</p>
+                          <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider pt-2">{post.date}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )}
 
             </div>
           )}
@@ -237,7 +236,7 @@ export default function NewsPage() {
   );
 }
 
-// Reusable Sub-Component for standard cards to keep code clean
+// REUSABLE SUB-COMPONENT
 function ArticleCard({ post }: { post: any }) {
   return (
     <Link href={`/blog/${post.id}`} className="group flex flex-col space-y-3">
