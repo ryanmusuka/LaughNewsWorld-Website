@@ -56,7 +56,7 @@ export default function AdvertisePage() {
     }));
   };
 
-  // Handle form submission to Supabase
+ // Handle form submission to Supabase
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -79,16 +79,23 @@ export default function AdvertisePage() {
 
       // 1. Upload File to Storage (If one was selected)
       if (selectedFile) {
-        // Create a unique file name
+        console.log("Attempting to upload file...", selectedFile.name);
         const fileExt = selectedFile.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `ad-creatives/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-          .from('advertisements') // Keep this as your bucket name
-          .upload(filePath, selectedFile);
+          .from('advertisements') 
+          .upload(filePath, selectedFile, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: selectedFile.type // <-- This prevents the 400 Bad Request error
+          });
 
-        if (uploadError) throw new Error('Failed to upload file. Please try again.');
+        if (uploadError) {
+          console.error("Storage Upload Error:", uploadError);
+          throw new Error(`Upload failed: ${uploadError.message}`);
+        }
 
         // Get the public URL
         const { data: { publicUrl } } = supabase.storage
@@ -96,23 +103,29 @@ export default function AdvertisePage() {
           .getPublicUrl(filePath);
           
         mediaUrl = publicUrl;
+        console.log("File uploaded successfully. URL:", mediaUrl);
       }
 
-      // 2. Save Data to Database using your EXACT column names
+      // 2. Save Data to Database
+      console.log("Attempting to insert into database...");
       const { error: dbError } = await supabase
-        .from('advertisement_requests') // Replace with your actual table name if different
+        .from('advertisement_requests')
         .insert([{
           contact_name: formData.contact_name,
           business_name: formData.business_name,
           email: formData.email,
           website_url: formData.website_url,
-          ad_types: formData.ad_types, // Expecting a text array in the DB
+          ad_types: formData.ad_types,
           caption: formData.caption,
-          media_url: mediaUrl,
-          status: 'pending' 
+          media_url: mediaUrl
         }]);
 
-      if (dbError) throw new Error(`Database error: ${dbError.message}`);
+      if (dbError) {
+        console.error("Database Insert Error:", dbError);
+        throw new Error(`Database error: ${dbError.message}`);
+      }
+
+      console.log("Database insert successful!");
 
       // 3. Success State & Reset
       setSubmitStatus({ type: 'success', message: 'Request submitted successfully! We will be in touch soon.' });
@@ -121,6 +134,7 @@ export default function AdvertisePage() {
       setUploadProgress(0);
 
     } catch (error: any) {
+      console.error("Caught Error:", error);
       setSubmitStatus({ type: 'error', message: error.message || 'An unexpected error occurred.' });
     } finally {
       setIsSubmitting(false);

@@ -47,21 +47,17 @@ export default function Footer() {
         {/* Column 3: Socials */}
         <div className="flex flex-col space-y-4">
           <h4 className="font-bold text-lg uppercase tracking-widest text-zinc-500 mb-2">Connect</h4>
-          <Link href="#" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">YouTube</Link>
-          <Link href="#" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">Instagram</Link>
-          <Link href="#" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">TikTok</Link>
-          <Link href="#" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">Facebook</Link>
-          <Link href="#" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">Whatsapp Social Group</Link>
-          <Link href="#" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">Whatsapp Channel</Link>
+          <Link href="https://www.youtube.com/@LaughNewsWorld" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">YouTube</Link>
+          <Link href="https://www.instagram.com/laughnewsworld" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">Instagram</Link>
+          <Link href="https://www.tiktok.com/@laughnewsworld?_r=1&_t=ZS-95BKjPaFwDB" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">TikTok</Link>
+          <Link href="https://www.facebook.com/share/1HpYavruzh/?mibextid=wwXIfr" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">Facebook</Link>
+          <Link href="https://chat.whatsapp.com/IpjA4FY5pQz47ewl8S7uYG?mode=gi_t" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">Whatsapp Social Group</Link>
+          <Link href="https://whatsapp.com/channel/0029VazU7At4dTnBmP2GXs3H" className="text-white hover:text-brand-yellow font-bold uppercase tracking-wider transition-colors w-fit">Whatsapp Channel</Link>
         </div>
       </div>
 
-      <div className="container mx-auto max-w-7xl mt-12 pt-8 border-t-2 border-zinc-800 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-zinc-500 font-medium">
+      <div className="container mx-auto max-w-7xl mt-12 pt-8 border-t-2 border-zinc-800 flex flex-col md:flex-row justify-center items-center gap-4 text-sm text-zinc-500 font-medium">
         <p>&copy; {currentYear} LaughNewsWorld. All rights reserved.</p>
-        <div className="flex space-x-4">
-          <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-          <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-        </div>
       </div>
     </footer>
   );

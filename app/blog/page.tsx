@@ -39,9 +39,7 @@ export default function NewsPage() {
       }
 
       if (data) {
-        // Map database columns to our UI expectations
         const mappedPosts = data.map((post: any) => ({
-          // Uses slug for the URL if it exists, otherwise falls back to ID
           id: post.slug || post.id, 
           category: post.category || post.topic || "News",
           title: post.title,
