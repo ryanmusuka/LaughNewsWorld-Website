@@ -8,11 +8,14 @@ import { useState, useEffect } from "react";
 
 // Reusable animation variants
 const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 40 },
+  hidden: { opacity: 0, y: 30 },
   visible: { 
     opacity: 1, 
     y: 0, 
-    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const } 
+    transition: { 
+      duration: 0.6, 
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number] // <-- This cast fixes the build
+    } 
   }
 };
 
@@ -83,7 +86,7 @@ export default function WatchPage() {
                 className="text-center md:text-left border-b-[4px] border-black dark:border-white pb-4"
               >
                 <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter">Latest Laughs & Revelation</h2>
-                <p className="text-zinc-500 mt-2 font-medium">Deep dives, full teachings, and unforgettable moments.</p>
+                <p className="text-zinc-500 mt-2 font-medium">Deep dives, revelatory teachings, and humourous moments.</p>
               </motion.div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">

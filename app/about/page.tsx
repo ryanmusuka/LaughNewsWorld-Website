@@ -7,11 +7,14 @@ import Script from "next/script"; // Required for isolated AdSense injection
 import GoogleAd from "@/components/GoogleAd"; // Your reusable Ad component
 
 const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 50 },
+  hidden: { opacity: 0, y: 30 },
   visible: { 
     opacity: 1, 
     y: 0, 
-    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const } 
+    transition: { 
+      duration: 0.6, 
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number] // <-- This cast fixes the build
+    } 
   }
 };
 
