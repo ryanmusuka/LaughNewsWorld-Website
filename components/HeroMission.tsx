@@ -1,3 +1,5 @@
+/* eslint-disable prefer-const */
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,7 +8,6 @@ import Link from "next/link";
 import Image from "next/image";
 
 const backgroundImages = [
-  "/assets/images/IMG_0042.webp",
   "/assets/images/IMG_1405.webp",
   "/assets/images/IMG_1683.webp",
   "/assets/images/IMG_21242.webp",
@@ -19,7 +20,6 @@ const backgroundImages = [
   "/assets/images/IMG_7611.webp",
   "/assets/images/IMG_7807.webp",
   "/assets/images/IMG_7831.webp",
-  "/assets/images/IMG_8027.webp",
   "/assets/images/IMG_8063.webp",
   "/assets/images/IMG_8099.webp",
   "/assets/images/IMG_8533.webp",

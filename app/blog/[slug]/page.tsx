@@ -23,16 +23,11 @@ const fadeUp: Variants = {
 
 // --- THE SMART EXTRACTOR FUNCTION ---
 function extractQuote(paragraph: string) {
-  const sentences = paragraph.match(/[^.!?]+[.!?]+/g) || [paragraph];
-  
-  if (sentences.length === 1) {
-    return { quote: paragraph, remainder: null };
-  }
-
-  const quote = sentences[0].trim();
-  const remainder = sentences.slice(1).join(" ").trim();
-  
-  return { quote, remainder };
+  // Returns the entire paragraph as the quote, with no leftover text
+  return { 
+    quote: paragraph.trim(), 
+    remainder: null 
+  };
 }
 
 export default function ArticlePage() {
@@ -91,7 +86,7 @@ export default function ArticlePage() {
           image: data.hero_image_url || data.image,
           readTime: data.read_time || "5 min read",
           author: data.author || "LaughNewsWorld Team",
-          youtubeVideoId: data.youtube_video_id || data.youtubeVideoId || null,
+          youtubeVideoId: data.youtube_video_id || null,
         });
       }
       setLoading(false);
@@ -122,7 +117,6 @@ export default function ArticlePage() {
     );
   }
 
-  // 5. THE ORIGINAL UI (UNTOUCHED)
   return (
     <>
       <Script
@@ -132,7 +126,7 @@ export default function ArticlePage() {
         crossOrigin="anonymous"
       />
 
-      <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 text-black dark:text-white pt-28 pb-16 px-6">
+      <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 text-black dark:text-white pt-8 pb-8 px-6">
         
         <div className="max-w-6xl mx-auto mb-10">
           <Link href="/" className="inline-flex items-center gap-2 text-zinc-500 hover:text-brand-blue font-bold uppercase tracking-widest text-xs transition-colors">
@@ -161,7 +155,7 @@ export default function ArticlePage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8 }}
-            className="w-full max-w-5xl mx-auto aspect-video md:aspect-[21/9] bg-zinc-200 overflow-hidden border-2 border-black dark:border-zinc-800 mb-16"
+            className="w-full max-w-5xl mx-auto aspect-video md:aspect-[16/9] bg-zinc-200 overflow-hidden border-2 border-black dark:border-zinc-800 mb-16"
           >
             <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
           </motion.div>
@@ -182,15 +176,14 @@ export default function ArticlePage() {
                     <div key={index} className="space-y-8">
                       {index === 2 ? (
                         <motion.div variants={fadeUp} className="pl-6 border-l-4 border-zinc-300 dark:border-zinc-700 py-2 my-10">
-                          <p className="text-xl font-bold italic text-zinc-600 dark:text-zinc-400">&quot;{extractQuote(paragraph).quote}&quot;</p>
+                          <p className="text-xl font-bold italic text-zinc-600 dark:text-zinc-400">&quot;{extractQuote(paragraph).quote}&quot; <br></br><span className="text-sm md:text-base lg:text-base font-black italic text-black dark:text-white">   ~ Prophet Uebert Angel</span></p>
                           {extractQuote(paragraph).remainder && <p className="text-lg md:text-xl text-zinc-800 dark:text-zinc-300 leading-relaxed font-serif mt-4">{extractQuote(paragraph).remainder}</p>}
                         </motion.div>
-                      ) : index === 4 ? (
+                      ) : index === 5 ? (
                         <motion.div variants={fadeUp} className="space-y-8">
                           <blockquote className="text-3xl md:text-4xl lg:text-5xl font-black italic tracking-tight border-l-[8px] border-brand-yellow pl-6 py-2 my-16 text-brand-blue dark:text-brand-blue leading-[1.1]">
-                            &quot;{extractQuote(paragraph).quote}&quot;
+                            &quot;{extractQuote(paragraph).quote}&quot; <span className="text-xl md:text-lg lg:text-lg font-black italic text-black dark:text-white"><br></br> ~ Prophet Uebert Angel</span>
                           </blockquote>
-                          {extractQuote(paragraph).remainder && <p className="text-lg md:text-xl text-zinc-800 dark:text-zinc-300 leading-relaxed font-serif mt-4">{extractQuote(paragraph).remainder}</p>}
                         </motion.div>
                       ) : (
                         <motion.p variants={fadeUp} className="text-lg md:text-xl text-zinc-800 dark:text-zinc-300 leading-relaxed font-serif">
@@ -250,7 +243,7 @@ export default function ArticlePage() {
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
             className="max-w-2xl mx-auto pt-10 mt-10 border-t-4 border-black dark:border-white text-center"
           >
-            <h3 className="text-2xl font-black uppercase tracking-tighter mb-6">Want more laughs?</h3>
+            <h3 className="text-2xl font-black uppercase tracking-tighter mb-6">Want more laughs & revelation?</h3>
             <Button asChild size="lg" className="bg-black text-white hover:bg-brand-yellow hover:text-black dark:bg-white dark:text-black dark:hover:bg-brand-yellow font-black text-lg px-8 py-6 rounded-none border-2 border-transparent hover:border-black transition-all uppercase tracking-widest">
               <Link href="/watch">Head to the Watch Page</Link>
             </Button>
