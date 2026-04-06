@@ -88,7 +88,7 @@ export default function DonatePage() {
           </div>
 
           {/* Single Focused Button */}
-          <a href="YOUR_STRIPE_PAYMENT_LINK_HERE" target="_blank" rel="noopener noreferrer" className="block w-full md:w-auto max-w-md mx-auto">
+          <a href="coming_soon" target="_blank" rel="noopener noreferrer" className="block w-full md:w-auto max-w-md mx-auto">
             <Button className="w-full bg-brand-yellow text-black hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black font-black text-lg py-7 rounded-2xl transition-all shadow-lg hover:shadow-brand-yellow/20">
               Support Our Mission
             </Button>
