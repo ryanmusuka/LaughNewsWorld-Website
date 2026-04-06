@@ -128,7 +128,7 @@ export default function ArticlePage() {
 
       <main className="min-h-screen bg-[#F9F9F8] dark:bg-zinc-950 text-black dark:text-white pt-8 pb-8 px-6">
         
-        <div className="max-w-6xl mx-auto mb-10">
+        <div className="max-w-6xl mx-auto mb-4">
           <Link href="/" className="inline-flex items-center gap-2 text-zinc-500 hover:text-brand-blue font-bold uppercase tracking-widest text-xs transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Back to Front Page
@@ -139,10 +139,10 @@ export default function ArticlePage() {
           
           <motion.header 
             initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-            className="space-y-6 text-center max-w-4xl mx-auto mb-12"
+            className="space-y-2 text-center max-w-4xl mx-auto mb-12"
           >
             
-            <motion.h1 variants={fadeUp} className="text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tighter leading-[1.05]">
+            <motion.h1 variants={fadeUp} className="text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tighter leading-[1.05]">
               {post.title}
             </motion.h1>
 
