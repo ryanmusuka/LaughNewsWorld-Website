@@ -174,12 +174,12 @@ export default function ArticlePage() {
 
                   return (
                     <div key={index} className="space-y-8">
-                      {index === 2 ? (
+                      {index === 4 ? (
                         <motion.div variants={fadeUp} className="pl-6 border-l-4 border-zinc-300 dark:border-zinc-700 py-2 my-10">
                           <p className="text-xl font-bold italic text-zinc-600 dark:text-zinc-400">&quot;{extractQuote(paragraph).quote}&quot; <br></br><span className="text-sm md:text-base lg:text-base font-black italic text-black dark:text-white">   ~ Prophet Uebert Angel</span></p>
                           {extractQuote(paragraph).remainder && <p className="text-lg md:text-xl text-zinc-800 dark:text-zinc-300 leading-relaxed font-serif mt-4">{extractQuote(paragraph).remainder}</p>}
                         </motion.div>
-                      ) : index === 5 ? (
+                      ) : index === 9 ? (
                         <motion.div variants={fadeUp} className="space-y-8">
                           <blockquote className="text-3xl md:text-4xl lg:text-5xl font-black italic tracking-tight border-l-[8px] border-brand-yellow pl-6 py-2 my-16 text-brand-blue dark:text-brand-blue leading-[1.1]">
                             &quot;{extractQuote(paragraph).quote}&quot; <span className="text-xl md:text-lg lg:text-lg font-black italic text-black dark:text-white"><br></br> ~ Prophet Uebert Angel</span>
