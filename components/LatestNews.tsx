@@ -36,7 +36,7 @@ export default async function LatestNews() {
             <p className="text-muted-foreground font-medium mt-2">Literary pieces from the LNW Team.</p>
           </div>
           <Button asChild className="hidden md:flex mt-4 md:mt-0 bg-brand-yellow text-white hover:bg-black/80 dark:text-black dark:hover:bg-white/80 font-bold text-lg px-8 py-6 rounded-none border-2 border-transparent transition-all hover:scale-105">
-            <Link href="/blog">
+            <Link href="/news">
                View All Articles
             </Link>
           </Button>
@@ -46,7 +46,7 @@ export default async function LatestNews() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {feed.map((article) => (
             // IMPORTANT: We wrap the entire Card in a Link pointing to the SLUG
-            <Link href={`/blog/${article.slug}`} key={article.id} className="block group">
+            <Link href={`/news/${article.slug}`} key={article.id} className="block group">
               <Card className="rounded-none border-2 border-border overflow-hidden h-full hover:border-primary transition-colors cursor-pointer">
                 <div className="relative h-60 w-full overflow-hidden bg-muted">
                   <Image 

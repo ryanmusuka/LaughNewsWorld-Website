@@ -146,7 +146,7 @@ export default function NewsPage() {
               
               {featuredPost && (
                 <section>
-                  <Link href={`/blog/${featuredPost.id}`} className="group grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
+                  <Link href={`/news/${featuredPost.id}`} className="group grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
                     <div className="lg:col-span-8 overflow-hidden bg-zinc-200 aspect-video relative border border-zinc-200 dark:border-zinc-800">
                       <img 
                         src={featuredPost.image} 
@@ -206,7 +206,7 @@ export default function NewsPage() {
                   <h3 className="text-2xl font-black uppercase tracking-tighter mb-6">More Stories</h3>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                     {archivePosts.map((post) => (
-                      <Link key={post.id} href={`/blog/${post.id}`} className="group flex flex-col sm:flex-row gap-6 items-start">
+                      <Link key={post.id} href={`/news/${post.id}`} className="group flex flex-col sm:flex-row gap-6 items-start">
                         <div className="w-full sm:w-48 shrink-0 aspect-[4/3] sm:aspect-square overflow-hidden bg-zinc-100">
                           <img src={post.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={post.title} />
                         </div>
@@ -237,7 +237,7 @@ export default function NewsPage() {
 // REUSABLE SUB-COMPONENT
 function ArticleCard({ post }: { post: any }) {
   return (
-    <Link href={`/blog/${post.id}`} className="group flex flex-col space-y-3">
+    <Link href={`/news/${post.id}`} className="group flex flex-col space-y-3">
       <div className="aspect-[4/3] overflow-hidden bg-zinc-100 relative">
         <img src={post.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={post.title} />
       </div>

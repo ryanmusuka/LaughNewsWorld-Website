@@ -95,9 +95,9 @@ export default function WatchPage() {
                     key={video.id}
                     initial="hidden" 
                     whileInView="visible" 
-                    viewport={{ once: true, margin: "50px" }} // Triggers individually as they scroll up!
+                    viewport={{ once: true, margin: "50px" }} 
                     variants={fadeUp}
-                    href={video.link} // Now using the real YouTube link
+                    href={video.link} 
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group relative block overflow-hidden bg-zinc-200 dark:bg-zinc-900 aspect-video rounded-xl border-4 border-transparent hover:border-brand-blue transition-all"
@@ -132,7 +132,7 @@ export default function WatchPage() {
                     whileInView="visible" 
                     viewport={{ once: true, margin: "50px" }} // Triggers individually
                     variants={fadeUp}
-                    href={video.link} // Now using the real YouTube link
+                    href={video.link} 
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group relative block overflow-hidden bg-zinc-200 dark:bg-zinc-900 aspect-[9/16] rounded-xl border-4 border-transparent hover:border-brand-yellow transition-all"
