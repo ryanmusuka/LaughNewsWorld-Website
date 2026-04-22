@@ -64,6 +64,3 @@ Balancing the brand colors (#ffad00 Yellow and #0093c9 Blue) with a modern "Dark
 * Input Sanitization: All user-submitted meme descriptions are sanitized to prevent script injection.
 * Row-Level Security (RLS): Supabase policies ensure users can only "Read" approved content, while "Write" access is restricted to the submission portal.
 
-### 📄 License
-
-This project is licensed under the MIT License.
