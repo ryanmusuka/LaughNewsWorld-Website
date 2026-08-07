@@ -14,8 +14,6 @@ export default function HomePage() {
       <VideoHighlights />
       {/* Modular Block 4: Reels/Shorts Gallery */}
       <ReelsGallery />
-      {/* Modular Block 5: Newsletter Signup */}
-
     </main>
   );
 }

@@ -43,57 +43,60 @@ export default function ArticlePage() {
   const SIDEBAR_SLOT = "6565072879";
   const BOTTOM_SLOT = "3333333333";
 
-  // 3. FETCH DATA FROM SUPABASE
-  useEffect(() => {
-    async function fetchPost() {
-      if (!slug) return;
+// 3. FETCH DATA FROM SUPABASE & MAP SCHEMA
+useEffect(() => {
+  async function fetchPost() {
+    if (!slug) return;
 
-      // Initialize the browser client safely using your environment variables
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
 
-      // Query the database 
-      const { data, error } = await supabase
-        .from('blog_posts') 
-        .select('*')
-        .eq('slug', slug) 
-        .single();
+    // Query blog_posts table matching exact schema
+    const { data, error } = await supabase
+      .from('blog_posts') 
+      .select('*, users(email)') // Relational join for author details
+      .eq('slug', slug)
+      .eq('is_published', true) // Security: Guard against unpublished draft exposure
+      .single();
 
-      console.log("=== SUPABASE PAYLOAD ===", data);
-      if (error) {
-        console.error("Error fetching article:", error);
-        setLoading(false);
-        return;
-      }
-
-      if (data) {
-        // Map the database response to match the exact format your UI expects
-        setPost({
-          ...data,
-          // Converts a single block of text from the DB into an array of paragraphs based on line breaks
-          content: Array.isArray(data.content) 
-            ? data.content 
-            : typeof data.content === 'string' 
-              ? data.content.split('\n').filter((p: string) => p.trim() !== '') 
-              : [],
-          // Formats PostgreSQL timestamp into 'Oct 24, 2026' format
-          date: new Date(data.created_at || data.date).toLocaleDateString('en-US', { 
-            month: 'short', day: 'numeric', year: 'numeric' 
-          }),
-          // Maps DB column names to UI variable names
-          image: data.hero_image_url || data.image,
-          readTime: data.read_time || "5 min read",
-          author: data.author || "LaughNewsWorld Team",
-          youtubeVideoId: data.youtube_video_id || null,
-        });
-      }
+    if (error || !data) {
+      console.error("Error fetching article:", error);
       setLoading(false);
+      return;
     }
 
-    fetchPost();
-  }, [slug]);
+    // Single-pass O(N) word count calculation for standard reading time (200 WPM)
+    const rawContent = data.content || "";
+    const wordCount = rawContent.trim().split(/\s+/).filter(Boolean).length;
+    const calculatedReadTime = `${Math.max(1, Math.ceil(wordCount / 200))} min read`;
+
+    // Split text into structural paragraphs by newline tokens
+    const parsedParagraphs = rawContent
+      .split(/\n+/)
+      .map((p: string) => p.trim())
+      .filter((p: string) => p.length > 0);
+
+    setPost({
+      id: data.id,
+      title: data.title,
+      content: parsedParagraphs,
+      image: data.hero_image_url || "/placeholder-hero.jpg", // Strict database column mapping
+      date: new Date(data.created_at).toLocaleDateString('en-US', { 
+        month: 'short', day: 'numeric', year: 'numeric' 
+      }),
+      readTime: calculatedReadTime,
+      author: data.users?.email ? data.users.email.split('@')[0] : "LaughNewsWorld Team",
+      views: data.views || 0,
+      youtubeVideoId: data.youtube_video_id || null,
+    });
+
+    setLoading(false);
+  }
+
+  fetchPost();
+}, [slug]);
 
   // 4. GRACEFUL LOADING & ERROR STATES
   if (loading) {
